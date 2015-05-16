@@ -28,6 +28,7 @@ import java.util.TimerTask;
 
 /**
  * Created by Joubert on 09/05/2015.
+ * tengo que recordar que si hacen logout se deben detener los timers de reconnecion.
  */
 public class Network extends Application {
 
