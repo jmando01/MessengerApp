@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.CountDownTimer;
 import android.util.Log;
 
 import org.jivesoftware.smack.AbstractXMPPConnection;
@@ -22,6 +23,8 @@ import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
 
 import java.io.IOException;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Created by Joubert on 09/05/2015.
@@ -72,7 +75,7 @@ public class Network extends Application {
         }).start();
     }
 
-    public String login (String username, String password, boolean autoLogin){
+    public String login (String username, String password, boolean autoLogin, boolean reconnecting){
         if(connection == null || !connection.isConnected()){
             // Create the configuration for this new connection
             XMPPTCPConnectionConfiguration.Builder configBuilder = XMPPTCPConnectionConfiguration.builder();
@@ -86,7 +89,7 @@ public class Network extends Application {
 
             connection = new XMPPTCPConnection(configBuilder.build());
 
-            if(autoLogin){
+            if(autoLogin && !reconnecting){
                 Intent intent = new Intent(getApplicationContext(), ChatListActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
@@ -111,7 +114,7 @@ public class Network extends Application {
 
                     setConnectionListener();
 
-                    if(!autoLogin){
+                    if(!autoLogin  && reconnecting){
                         Intent intent = new Intent(getApplicationContext(), ChatListActivity.class);
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         startActivity(intent);
@@ -127,6 +130,7 @@ public class Network extends Application {
             }catch (SmackException | IOException | XMPPException e){
                 Log.d("Network",  "Error connecting");
                 e.getStackTrace();
+                startReconnectionTimer();
                 return "Error connecting to our services.";
             }
         }else{
@@ -140,6 +144,19 @@ public class Network extends Application {
             LoginActivity.activity.finish();
             return "The is already a connection";
         }
+    }
+
+    public void startReconnectionTimer(){
+
+        new CountDownTimer(6000, 1000) {
+            public void onTick(final long millisUntilFinished) {
+                Log.d("ChatEntryActivity","ReconnectinIn: " + millisUntilFinished / 1000);
+            }
+
+            public void onFinish() {
+                login (LoginActivity.sharedPref.getString("username", "default"), LoginActivity.sharedPref.getString("password", "default"), true, true);
+            }
+        }.start();
     }
 
     public void setConnectionListener() {

@@ -52,7 +52,7 @@ public class LoginActivity extends Activity {
 
                     if(((Network) getApplication()).isNetworkConnected()){
                         Log.d("LoginActivity",  "networkOK");
-                        ((Network) getApplication()).login(username, password, true);
+                        ((Network) getApplication()).login(username, password, true, false);
                     }else{
                         //No network available
                         Log.d("LoginActivity", "No Network Available. Autologin");
@@ -103,7 +103,7 @@ public class LoginActivity extends Activity {
 
             if(((Network) getApplication()).isNetworkConnected()){
                 Log.d("LoginActivity",  "networkOK");
-                result = ((Network) getApplication()).login(username, password, false);
+                result = ((Network) getApplication()).login(username, password, false, false);
             }else{
                 //No network available
                 Log.d("LoginActivity", "No Network Available");

@@ -13,9 +13,9 @@ import android.view.Window;
 
 public class ChatListActivity extends FragmentActivity {
 
-    ViewPager Tab;
-    TabPagerAdapter TabAdapter;
-    ActionBar actionBar;
+    private ViewPager Tab;
+    private TabPagerAdapter TabAdapter;
+    private ActionBar actionBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
