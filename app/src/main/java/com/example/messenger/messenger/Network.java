@@ -38,6 +38,9 @@ public class Network extends Application {
     private int PORT = 5222;
     private String RESOURCE = "Home";
     private SharedPreferences.Editor editor;
+    private ConnectionListener connectionListener;
+    private boolean reconnection = false;
+    private Timer timer;
 
     public boolean isNetworkConnected() {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -75,8 +78,8 @@ public class Network extends Application {
         }).start();
     }
 
-    public String login (String username, String password, boolean autoLogin, boolean reconnecting){
-        if(connection == null || !connection.isConnected()){
+    public String login (String username, String password, boolean autoLogin, boolean reconnectionTimer){
+        if((connection == null) || (!connection.isConnected() && !reconnection)){
             // Create the configuration for this new connection
             XMPPTCPConnectionConfiguration.Builder configBuilder = XMPPTCPConnectionConfiguration.builder();
             configBuilder.setUsernameAndPassword(username+"@localhost", password);
@@ -89,7 +92,7 @@ public class Network extends Application {
 
             connection = new XMPPTCPConnection(configBuilder.build());
 
-            if(autoLogin && !reconnecting){
+            if(autoLogin && !reconnectionTimer){
                 Intent intent = new Intent(getApplicationContext(), ChatListActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
@@ -114,7 +117,7 @@ public class Network extends Application {
 
                     setConnectionListener();
 
-                    if(!autoLogin  && reconnecting){
+                    if(!autoLogin){
                         Intent intent = new Intent(getApplicationContext(), ChatListActivity.class);
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         startActivity(intent);
@@ -128,12 +131,16 @@ public class Network extends Application {
                     return "Your username or password is wrong.";
                 }
             }catch (SmackException | IOException | XMPPException e){
-                Log.d("Network",  "Error connecting");
+                Log.d("Network", "Error connecting");
                 e.getStackTrace();
-                startReconnectionTimer();
+
+                if(autoLogin && connectionListener == null){
+                    startReconnectionTimer();
+                }
+
                 return "Error connecting to our services.";
             }
-        }else{
+        } else {
             Log.d("Network", "Already connected");
             Log.d("Network", "Logged in as: " + connection.getUser());
 
@@ -147,21 +154,22 @@ public class Network extends Application {
     }
 
     public void startReconnectionTimer(){
+        Log.d("Network","Reconnection Timer Started");
 
-        new CountDownTimer(6000, 1000) {
-            public void onTick(final long millisUntilFinished) {
-                Log.d("ChatEntryActivity","ReconnectinIn: " + millisUntilFinished / 1000);
-            }
+        timer = new Timer();
 
-            public void onFinish() {
-                login (LoginActivity.sharedPref.getString("username", "default"), LoginActivity.sharedPref.getString("password", "default"), true, true);
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                Log.d("Network", "Reconnection Timer Started..Connecting");
+                login(LoginActivity.sharedPref.getString("username", "default"), LoginActivity.sharedPref.getString("password", "default"), true, true);
             }
-        }.start();
+        }, 12 * 1000);
     }
 
     public void setConnectionListener() {
 
-        connection.addConnectionListener(new ConnectionListener() {
+        connection.addConnectionListener(connectionListener = new ConnectionListener() {
             @Override
             public void connected(XMPPConnection connection) {
                 Log.d("Network",  "connected");
@@ -185,11 +193,13 @@ public class Network extends Application {
             @Override
             public void reconnectionSuccessful() {
                 Log.d("Network",  "reconnectionSuccessful");
+                reconnection = false;
             }
 
             @Override
             public void reconnectingIn(int seconds) {
                 Log.d("Network",  "reconnectingIn: " + seconds);
+                reconnection = true;
             }
 
             @Override
