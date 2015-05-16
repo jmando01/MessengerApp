@@ -8,9 +8,15 @@
 
     <item
         android:id="@+id/logoutBtn"
-        android:orderInCategory="101"
+        android:orderInCategory="102"
         android:onClick="logoutBtn"
         android:title="Logout"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/statusBtn"
+        android:orderInCategory="101"
+        android:onClick="statusBtn"
+        android:title="Status"
         app:showAsAction="never"/>
 
 </menu>

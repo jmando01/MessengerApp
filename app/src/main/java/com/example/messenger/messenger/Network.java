@@ -28,7 +28,7 @@ import java.util.TimerTask;
 
 /**
  * Created by Joubert on 09/05/2015.
- * documentar el proceso de reconnection
+ * En ves de hacer el proceso de Reconnect simplemente se podria llamar a connect neuvamente.
  */
 public class Network extends Application {
 
@@ -118,6 +118,7 @@ public class Network extends Application {
                     editor.commit();
 
                     setConnectionListener();
+                    setPresence(LoginActivity.sharedPref.getString("status", "Available"));
 
                     if(!autoLogin){
                         Intent intent = new Intent(getApplicationContext(), ChatListActivity.class);
@@ -210,6 +211,22 @@ public class Network extends Application {
                 e.getStackTrace();
             }
         });
+    }
+
+    public boolean setPresence(String status){
+        // Create a new presence.
+        Presence presence = new Presence(Presence.Type.available);
+        presence.setStatus(status);
+        // Send the packet.
+        try {
+            connection.sendStanza(presence);
+            Log.d("Network", "Changed status to: "+ status);
+            return true;
+        } catch (SmackException.NotConnectedException e) {
+            Log.d("Network", "Error changing status");
+            e.printStackTrace();
+            return false;
+        }
     }
 
     public void disconect(){

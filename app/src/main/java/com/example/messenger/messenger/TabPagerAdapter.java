@@ -18,10 +18,10 @@ public class TabPagerAdapter extends FragmentStatePagerAdapter {
             return new Android();
         case 1:
            //Fragment for Ios Tab
-            return new Ios();
+            return new ChatListTab();
         case 2:
             //Fragment for Windows Tab
-            return new Windows();
+            return new ContactListTab();
         }
 		return null;
 		

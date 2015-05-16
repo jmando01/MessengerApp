@@ -28,6 +28,10 @@
             android:name=".ChatListActivity"
             android:label="@string/title_activity_chat_list" >
         </activity>
+        <activity
+            android:name=".StatusActivity"
+            android:label="@string/title_activity_status" >
+        </activity>
     </application>
 
 </manifest>

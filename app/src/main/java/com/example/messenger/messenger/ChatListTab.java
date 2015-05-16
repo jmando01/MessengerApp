@@ -11,15 +11,15 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class Ios extends Fragment {
+public class ChatListTab extends Fragment {
 	 @Override
 	    public View onCreateView(LayoutInflater inflater, ViewGroup container,
 	            Bundle savedInstanceState) {
 	 
-	        View ios = inflater.inflate(R.layout.ios_frag, container, false);
+	        View chatlisttab = inflater.inflate(R.layout.chat_list_frag, container, false);
 
 			 String [] status = new String [] {"Online", "Busy", "At the phone", "At Work", "Driving", "Offline"} ;
-			 ListView listView = (ListView) ios.findViewById(R.id.chatlistlv);
+			 ListView listView = (ListView) chatlisttab.findViewById(R.id.chatlistlv);
 
 			 listView.setAdapter(new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, status));
 
@@ -37,6 +37,6 @@ public class Ios extends Fragment {
 			 }
 		 });
 
-	        ((TextView)ios.findViewById(R.id.textView)).setText("iOS");
-	        return ios;
+	        ((TextView)chatlisttab.findViewById(R.id.textView)).setText("iOS");
+	        return chatlisttab;
 }}

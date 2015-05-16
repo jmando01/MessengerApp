@@ -63,9 +63,9 @@ public class ChatListActivity extends FragmentActivity {
 
             }};
         //Add New Tab
-        actionBar.addTab(actionBar.newTab().setText("Android").setTabListener(tabListener));
-        actionBar.addTab(actionBar.newTab().setText("iOS").setTabListener(tabListener));
-        actionBar.addTab(actionBar.newTab().setText("Windows").setTabListener(tabListener));
+        actionBar.addTab(actionBar.newTab().setText("Updates").setTabListener(tabListener));
+        actionBar.addTab(actionBar.newTab().setText("Chats").setTabListener(tabListener));
+        actionBar.addTab(actionBar.newTab().setText("Contacts").setTabListener(tabListener));
 
         Tab.setCurrentItem(1);
 
@@ -82,6 +82,11 @@ public class ChatListActivity extends FragmentActivity {
         ((Network) getApplication()).disconect();
 
         Intent intent = new Intent(this, LoginActivity.class);
+        startActivity(intent);
+    }
+
+    public void statusBtn(MenuItem item){
+        Intent intent = new Intent(this, StatusActivity.class);
         startActivity(intent);
     }
 
