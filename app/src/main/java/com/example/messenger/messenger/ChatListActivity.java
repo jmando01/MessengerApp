@@ -2,6 +2,8 @@ package com.example.messenger.messenger;
 
 import android.app.ActionBar;
 import android.app.FragmentTransaction;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
@@ -16,6 +18,7 @@ public class ChatListActivity extends FragmentActivity {
     private ViewPager Tab;
     private TabPagerAdapter TabAdapter;
     private ActionBar actionBar;
+    private SharedPreferences.Editor editor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +69,20 @@ public class ChatListActivity extends FragmentActivity {
 
         Tab.setCurrentItem(1);
 
+    }
+
+    public void logoutBtn(MenuItem item){
+        editor = LoginActivity.sharedPref.edit();
+        editor.putString("username", "");
+        editor.putString("password", "");
+        editor.putBoolean("autoLogin", false);
+        editor.commit();
+
+        finish();
+        ((Network) getApplication()).disconect();
+
+        Intent intent = new Intent(this, LoginActivity.class);
+        startActivity(intent);
     }
 
     @Override

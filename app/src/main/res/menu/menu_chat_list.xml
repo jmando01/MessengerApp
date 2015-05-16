@@ -4,4 +4,13 @@
     tools:context="com.example.messenger.messenger.ChatListActivity">
     <item android:id="@+id/action_settings" android:title="@string/action_settings"
         android:orderInCategory="100" app:showAsAction="never" />
+
+
+    <item
+        android:id="@+id/logoutBtn"
+        android:orderInCategory="101"
+        android:onClick="logoutBtn"
+        android:title="Logout"
+        app:showAsAction="never"/>
+
 </menu>

@@ -28,7 +28,7 @@ import java.util.TimerTask;
 
 /**
  * Created by Joubert on 09/05/2015.
- * tengo que recordar que si hacen logout se deben detener los timers de reconnecion.
+ * documentar el proceso de reconnection
  */
 public class Network extends Application {
 
@@ -94,6 +94,7 @@ public class Network extends Application {
             connection = new XMPPTCPConnection(configBuilder.build());
 
             if(autoLogin && !reconnectionTimer){
+                Log.d("Network", "Autologin");
                 Intent intent = new Intent(getApplicationContext(), ChatListActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
@@ -173,39 +174,39 @@ public class Network extends Application {
         connection.addConnectionListener(connectionListener = new ConnectionListener() {
             @Override
             public void connected(XMPPConnection connection) {
-                Log.d("Network",  "connected");
+                Log.d("Network", "connected");
             }
 
             @Override
             public void authenticated(XMPPConnection connection, boolean resumed) {
-                Log.d("Network",  "authenticated");
+                Log.d("Network", "authenticated");
             }
 
             @Override
             public void connectionClosed() {
-                Log.d("Network",  "connection closed");
+                Log.d("Network", "connection closed");
             }
 
             @Override
             public void connectionClosedOnError(Exception e) {
-                Log.d("Network",  "connectionClosedOnError");
+                Log.d("Network", "connectionClosedOnError");
             }
 
             @Override
             public void reconnectionSuccessful() {
-                Log.d("Network",  "reconnectionSuccessful");
+                Log.d("Network", "reconnectionSuccessful");
                 reconnection = false;
             }
 
             @Override
             public void reconnectingIn(int seconds) {
-                Log.d("Network",  "reconnectingIn: " + seconds);
+                Log.d("Network", "reconnectingIn: " + seconds);
                 reconnection = true;
             }
 
             @Override
             public void reconnectionFailed(Exception e) {
-                Log.d("Network",  "reconnectionFailed");
+                Log.d("Network", "reconnectionFailed");
                 e.getStackTrace();
             }
         });
@@ -217,6 +218,12 @@ public class Network extends Application {
                 try {
                     // Log into the server
                     connection.disconnect();
+                    if(connectionListener != null){
+                        connection.removeConnectionListener(connectionListener);
+                    }
+                    if(timer != null){
+                        timer.cancel();
+                    }
                     Log.d("Network",  "Disconnected");
                 }catch(Exception e){
                     Log.d("Network",  "Error disconnecting");
