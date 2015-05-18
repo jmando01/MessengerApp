@@ -17,6 +17,7 @@ import android.view.MenuItem;
 import android.view.Window;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 
 public class ChatListActivity extends FragmentActivity {
@@ -124,9 +125,23 @@ public class ChatListActivity extends FragmentActivity {
                 })
                 .setPositiveButton("Add Contact!", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        String contact;
+                        final String contact;
+                        final String[] notification = new String[1];
+
                         contact = addContactEdit.getText().toString();
-                        ((Network) getApplication()).addRoster(contact + "@localhost");
+                        new Thread(new Runnable() {
+                            public void run() {
+                                notification[0] = ((Network) getApplication()).addRoster(contact + "@localhost");
+                            }
+                        }).start();
+
+                        if(notification[0] != null){
+                            ((Network) getApplication()).showAlertDialog("Notification", notification[0], ChatListActivity.this);
+                        }else{
+                            Toast.makeText(ChatListActivity.this,
+                                    "The user "+ contact + "has been added successfully.", Toast.LENGTH_LONG)
+                                    .show();
+                        }
                     }
                 });
 

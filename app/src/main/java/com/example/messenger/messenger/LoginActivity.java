@@ -28,6 +28,7 @@ public class LoginActivity extends Activity {
     private String username;
     private String password;
     private long mLastClickTime;
+    private ProgressDialog pDialog;
 
     public static Activity activity;
     public static SharedPreferences sharedPref;
@@ -80,13 +81,12 @@ public class LoginActivity extends Activity {
 
     class AttemptLogin extends AsyncTask<Void, Void, String> {
 
-        private ProgressDialog pDialog = new ProgressDialog(LoginActivity.this);
         private String result = "";
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-
+            pDialog = new ProgressDialog(LoginActivity.this);
             pDialog.setMessage("Logging In...");
             pDialog.setCancelable(false);
             pDialog.show();
@@ -122,6 +122,15 @@ public class LoginActivity extends Activity {
             if(result != null){
                 ((Network) getApplication()).showAlertDialog("Notification!", result, LoginActivity.this);
             }
+        }
+    }
+
+    @Override
+    protected void onPause(){
+        super.onPause();
+        Log.d("LoginActivity","onPause");
+        if(pDialog != null){
+            pDialog.dismiss();
         }
     }
 

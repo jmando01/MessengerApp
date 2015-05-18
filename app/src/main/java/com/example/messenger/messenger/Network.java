@@ -31,7 +31,9 @@ import java.util.TimerTask;
 
 /**
  * Created by Joubert on 09/05/2015.
- * En ves de hacer el proceso de Reconnect simplemente se podria llamar a connect neuvamente.
+ * Hay que terminar el metodo de borrar un roster.
+ * hay que llenar la lista de contactos desde la base de datos.
+ * Hay que agregar el metodo de onlongtouch para que aparezcan opciones.
  */
 public class Network extends Application {
 
@@ -226,7 +228,10 @@ public class Network extends Application {
             @Override
             public void entriesAdded(Collection<String> addresses) {
                 Log.d("Network", "Entries Added: " + addresses.toString());
-
+                String entry = addresses.toString().substring(1, addresses.toString().length() - 1);
+                //Existe la posibilidad de hacer un metodo para aceptar los usuarios si queremos.
+                addRoster(entry);//Ya tiene el service
+                //Aca se deberian agregar los usuario que se agregan o que nos agregan a la DB local.
             }
 
             @Override
@@ -246,22 +251,50 @@ public class Network extends Application {
         });
     }
 
-    public void addRoster(String username){
+    public String addRoster(String username){
         //Lo que esta en null es para saber si pertenece a un grupo
         try {
             roster.createEntry(username, username, null);
+            return null;
         } catch (SmackException.NotLoggedInException e) {
             Log.d("Network", "NotLoggedInException");
             e.printStackTrace();
+            return "User not logged in. Wait for reconnection.";
         } catch (SmackException.NoResponseException e) {
             Log.d("Network", "NoResponseException");
             e.printStackTrace();
+            return "There is no response from server.";
         } catch (XMPPException.XMPPErrorException e) {
             Log.d("Network", "XMPPErrorException");
             e.printStackTrace();
+            return "General error has ocurred.";
         } catch (SmackException.NotConnectedException e) {
             Log.d("Network", "NotConnectedException");
             e.printStackTrace();
+            return "You are not connected to Internet.";
+        }
+    }
+
+    public String removeRoster(String username){
+        try {
+            roster.removeEntry(roster.getEntry(username));
+            return null;
+        } catch (SmackException.NotLoggedInException e) {
+            Log.d("Network", "NotLoggedInException");
+            e.printStackTrace();
+            return "User not logged in. Wait for reconnection.";
+        } catch (SmackException.NoResponseException e) {
+            Log.d("Network", "NoResponseException");
+            e.printStackTrace();
+            return "There is no response from server.";
+        } catch (XMPPException.XMPPErrorException e) {
+            Log.d("Network", "XMPPErrorException");
+            e.printStackTrace();
+            return "General error has ocurred.";
+        } catch (SmackException.NotConnectedException e) {
+            Log.d("Network", "NotConnectedException");
+            e.printStackTrace();
+            return "You are not connected to Internet.";
         }
     }
 
