@@ -19,10 +19,13 @@ import org.jivesoftware.smack.SmackException;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Presence;
+import org.jivesoftware.smack.roster.Roster;
+import org.jivesoftware.smack.roster.RosterListener;
 import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -42,6 +45,7 @@ public class Network extends Application {
     private ConnectionListener connectionListener;
     private boolean reconnection = false;
     private Timer timer;
+    private Roster roster;
 
     public boolean isNetworkConnected() {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -119,6 +123,10 @@ public class Network extends Application {
 
                     setConnectionListener();
                     setPresence(LoginActivity.sharedPref.getString("status", "Available"));
+
+                    roster = Roster.getInstanceFor(connection);
+                    Log.d("Connect", "Roster subscription mode set to: " + roster.getSubscriptionMode());
+                    setRosterListener();
 
                     if(!autoLogin){
                         Intent intent = new Intent(getApplicationContext(), ChatListActivity.class);
@@ -211,6 +219,50 @@ public class Network extends Application {
                 e.getStackTrace();
             }
         });
+    }
+
+    public void setRosterListener(){
+        roster.addRosterListener(new RosterListener() {
+            @Override
+            public void entriesAdded(Collection<String> addresses) {
+                Log.d("Network", "Entries Added: " + addresses.toString());
+
+            }
+
+            @Override
+            public void entriesUpdated(Collection<String> addresses) {
+                Log.d("Network", "Entries Updated: " + addresses);
+            }
+
+            @Override
+            public void entriesDeleted(Collection<String> addresses) {
+                Log.d("Network", "Entries Deleted: " + addresses);
+            }
+
+            @Override
+            public void presenceChanged(Presence presence) {
+                Log.d("Network", "Presence Changed User: " + presence.getFrom() + " Status: " + presence.getStatus());
+            }
+        });
+    }
+
+    public void addRoster(String username){
+        //Lo que esta en null es para saber si pertenece a un grupo
+        try {
+            roster.createEntry(username, username, null);
+        } catch (SmackException.NotLoggedInException e) {
+            Log.d("Network", "NotLoggedInException");
+            e.printStackTrace();
+        } catch (SmackException.NoResponseException e) {
+            Log.d("Network", "NoResponseException");
+            e.printStackTrace();
+        } catch (XMPPException.XMPPErrorException e) {
+            Log.d("Network", "XMPPErrorException");
+            e.printStackTrace();
+        } catch (SmackException.NotConnectedException e) {
+            Log.d("Network", "NotConnectedException");
+            e.printStackTrace();
+        }
     }
 
     public boolean setPresence(String status){

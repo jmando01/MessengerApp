@@ -158,7 +158,13 @@ public class RegisterActivity extends Activity {
 
                         if(((Network) RegisterActivity.this.getApplication()).isNetworkConnected()){
                             Log.d("RegisterActivity",  "networkOK");
-                            ((Network) RegisterActivity.this.getApplication()).login(username, password, true, false);
+                            String notification;
+                            notification = ((Network) RegisterActivity.this.getApplication()).login(username, password, true, false);
+                            if(notification == null){
+                                finish();
+                            }else{
+                                ((Network) getApplication()).showAlertDialog("Notification!", notification, RegisterActivity.this);
+                            }
                         }else{
                             //No network available
                             Log.d("LoginActivity", "No Network Available");

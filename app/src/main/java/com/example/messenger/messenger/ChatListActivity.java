@@ -1,16 +1,22 @@
 package com.example.messenger.messenger;
 
 import android.app.ActionBar;
+import android.app.AlertDialog;
 import android.app.FragmentTransaction;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.text.InputType;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Window;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 
 
 public class ChatListActivity extends FragmentActivity {
@@ -89,6 +95,48 @@ public class ChatListActivity extends FragmentActivity {
         Intent intent = new Intent(this, StatusActivity.class);
         startActivity(intent);
     }
+    public void searchBtn(MenuItem item){
+
+    }
+
+    public void addContactBtn(MenuItem item){
+        LinearLayout lila1= new LinearLayout(ChatListActivity.this);
+        lila1.setOrientation(LinearLayout.VERTICAL);
+
+        final EditText addContactEdit = new EditText(ChatListActivity.this);
+        addContactEdit.setHint("Add Contact");
+        addContactEdit.setGravity(Gravity.CENTER);
+        addContactEdit.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PERSON_NAME);
+
+        lila1.addView(addContactEdit);
+
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(ChatListActivity.this);
+        alertDialogBuilder
+                .setTitle("Add a new contact")
+                .setView(lila1)
+                //.setIcon(R.drawable.ic_action_add_person)
+                //.setMessage("Add a new contact")
+                .setCancelable(false)
+                .setNeutralButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                })
+                .setPositiveButton("Add Contact!", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        String contact;
+                        contact = addContactEdit.getText().toString();
+                        ((Network) getApplication()).addRoster(contact + "@localhost");
+                    }
+                });
+
+        AlertDialog alertDialog = alertDialogBuilder.create();
+        alertDialog.show();
+
+    }
+
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

@@ -51,7 +51,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 + KEY_FROMJID + " TEXT,"
                 + KEY_TOJID + " TEXT,"
                 + KEY_SENTDATE + " TEXT,"
-                + KEY_BODY + " TEXT," + ")";
+                + KEY_BODY + " TEXT " + ")";
         db.execSQL(CREATE_MESSAGE_ARCHIVE_TABLE);
 
         String CREATE_CONTACTS_TABLE = "CREATE TABLE " + CONTACTS_TABLE + "("
@@ -64,7 +64,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         String CREATE_CHAT_CONTACTS_TABLE = "CREATE TABLE " + CHATS_TABLE + "("
                 + KEY_ID + " INTEGER PRIMARY KEY,"
                 + KEY_USER + " TEXT,"
-                + KEY_CHAT + " TEXT, " + ")";
+                + KEY_CHAT + " TEXT " + ")";
         db.execSQL(CREATE_CHAT_CONTACTS_TABLE);
     }
 
@@ -95,7 +95,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         // Inserting Row
         db.insert(MESSAGE_ARCHIVE_TABLE, null, values);
-        db.close(); // Closing database connection
+        db.close();
     }
 
     // Adding new contact
@@ -107,7 +107,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put(KEY_STATUS, (contact.getStatus()) ? 1 : 0);
         // Inserting Row
         db.insert(CONTACTS_TABLE, null, values);
-        db.close(); // Closing database connection
+        db.close();
     }
 
     // Adding new chat
@@ -119,7 +119,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         // Inserting Row
         db.insert(CHATS_TABLE, null, values);
-        db.close(); // Closing database connection
+        db.close();
     }
 
     // Getting single message
@@ -227,7 +227,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return contactList;
     }
 
-
     // Getting All Chats
     public List<Chat> getAllChats() {
         List<Chat> chatList = new ArrayList<Chat>();
@@ -279,7 +278,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 new String[] { String.valueOf(contact.getID()) });
         db.close();
     }
-
 
     // Updating single chat
     public void updateChat(Chat chat) {

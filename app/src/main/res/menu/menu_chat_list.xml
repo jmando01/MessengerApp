@@ -2,10 +2,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.example.messenger.messenger.ChatListActivity">
-    <item android:id="@+id/action_settings" android:title="@string/action_settings"
-        android:orderInCategory="100" app:showAsAction="never" />
 
-
+    <item android:id="@+id/action_settings"
+        android:title="@string/action_settings"
+        android:orderInCategory="100"
+        app:showAsAction="never" />
     <item
         android:id="@+id/logoutBtn"
         android:orderInCategory="102"
@@ -18,5 +19,19 @@
         android:onClick="statusBtn"
         android:title="Status"
         app:showAsAction="never"/>
+    <item
+        android:id="@+id/addContactBtn"
+        android:orderInCategory="2"
+        android:icon="@drawable/ic_action_add_person"
+        android:onClick="addContactBtn"
+        android:title="Add Contact"
+        android:showAsAction="always"/>
+    <item
+        android:id="@+id/searchBtn"
+        android:orderInCategory="1"
+        android:icon="@drawable/ic_action_search"
+        android:onClick="searchBtn"
+        android:title="Search"
+        android:showAsAction="always"/>
 
 </menu>
