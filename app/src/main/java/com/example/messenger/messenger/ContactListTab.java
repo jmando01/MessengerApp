@@ -1,12 +1,16 @@
 package com.example.messenger.messenger;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -42,9 +46,45 @@ public class ContactListTab extends Fragment {
 			 }
 		 }
 
-		 ListView lv1 = (ListView) contactlisttab.findViewById(R.id.contactListLv);
+		 final ListView lv1 = (ListView) contactlisttab.findViewById(R.id.contactListLv);
 		 adapter = new ContactListBaseAdapter(getActivity(), contacts);
 		 lv1.setAdapter(adapter);
+
+		 lv1.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+			 @Override
+			 public void onItemClick(AdapterView<?> a, View v, int position, long id) {
+				 Object o = lv1.getItemAtPosition(position);
+				 Contact contact = (Contact)o;
+
+				 //Aqui va el codigo para enviar mensaje a contacto.
+			 }
+		 });
+
+		 lv1.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener(){
+			 @Override
+			 public boolean onItemLongClick(AdapterView<?> parent, final View view, int position, long id) {
+				 Object o = lv1.getItemAtPosition(position);
+				 final Contact contact = (Contact)o;
+
+				 final CharSequence[] items = {"Send a Message", "Delete Contact"};
+
+				 AlertDialog.Builder builder = new AlertDialog.Builder(context);
+				 builder.setTitle("Make your selection");
+				 builder.setItems(items, new DialogInterface.OnClickListener() {
+					 public void onClick(DialogInterface dialog, int item) {
+						 if(item == 0){
+							 //Aqui debe ir el codigo para enviar un mensaje al contacto.
+						 }
+
+						 if(item == 1){
+							//Aqui debe ir el codigo para borrar un contacto.
+						 }
+					 }
+				 });
+				 AlertDialog alert = builder.create();
+				 alert.show();
+				 return true; //Esto sirve para que no se abran ambos metodos de ontouch
+			 }} );
 
 		 return contactlisttab;
 	 }

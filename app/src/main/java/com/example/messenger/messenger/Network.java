@@ -33,11 +33,8 @@ import java.util.TimerTask;
 
 /**
  * Created by Joubert on 09/05/2015.
- * Hay que terminar el metodo de borrar un roster. Hay que terminar lo que sigue primero.
- * Hay que agregar el metodo de onlongtouch para que aparezcan opciones. y asi poder borrar contacto por ahora...
- * verificar para todas las cuentas
- * hacer una revision general..
- * Empezar de atras pa lante
+ * Hay que terminar el metodo de borrar un roster.
+ * Hay que hace un buscador para los contactos.
  */
 public class Network extends Application {
 
