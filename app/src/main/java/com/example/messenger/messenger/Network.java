@@ -47,7 +47,7 @@ public class Network extends Application {
     private String OPENFIRESERVICE = "localhost";
     private String RESOURCE = "Home";
     private int PORT = 5222;
-    private boolean reconnection = false;
+    private boolean clreconnection = false;
     private SharedPreferences.Editor editor;
     private ConnectionListener connectionListener;
     private Timer timer;
@@ -66,7 +66,7 @@ public class Network extends Application {
     }
 
     public String login(String username, String password, boolean autoLogin, boolean reconnectionTimer){
-        if((connection == null) || (!connection.isConnected() && !reconnection)){
+        if((connection == null) || (!connection.isConnected() && !clreconnection)){
             // Create the configuration for this new connection
             XMPPTCPConnectionConfiguration.Builder configBuilder = XMPPTCPConnectionConfiguration.builder();
             configBuilder.setUsernameAndPassword(username, password);
@@ -125,10 +125,11 @@ public class Network extends Application {
                     return "Your username or password is wrong.";
                 }
             }catch (SmackException | IOException | XMPPException e){
-                Log.d("Network", "Error connecting");
+                Log.d("Network", "Error connecting... ");
                 e.getStackTrace();
 
                 if(autoLogin && connectionListener == null){
+                    Log.d("Network", "Attempting to recconect Timer");
                     startReconnectionTimer();
                 }
 
@@ -188,13 +189,13 @@ public class Network extends Application {
             @Override
             public void reconnectionSuccessful() {
                 Log.d("Network", "reconnectionSuccessful");
-                reconnection = false;
+                clreconnection = false;
             }
 
             @Override
             public void reconnectingIn(int seconds) {
                 Log.d("Network", "reconnectingIn: " + seconds);
-                reconnection = true;
+                clreconnection = true;
             }
 
             @Override
@@ -252,28 +253,25 @@ public class Network extends Application {
             @Override
             public void presenceChanged(final Presence presence) {
                 Log.d("Network", "Presence Changed User: " + presence.getFrom() + " Status: " + presence.getStatus());
-                String from = "";
-                try {
-                    Log.d("Network", "Roster Type: " + roster.getEntry(presence.getFrom().substring(0, presence.getFrom().indexOf('/'))).getType());
-                    if(roster.getEntry(presence.getFrom().substring(0, presence.getFrom().indexOf('/'))).getType().toString().equals("both")) {
-                        from = presence.getFrom().substring(0, presence.getFrom().indexOf('/'));
 
-                        final String finalFrom = from;
-                        mHandler.post(new Runnable() {
-                            public void run() {
-                                try {
-                                    ContactListTab.setPresenceChanged(finalFrom, presence.getStatus() == null ? "Offline" : presence.getStatus().toString());
-                                }catch(Exception e){
-                                    Log.d("Network", "Presence Changed  ERROR");
-                                    e.getStackTrace();
-                                }
-                            }
-                        });
-                    }
-                }catch(Exception e){
-                    ContactListTab.setPresenceChanged(from, "Offline");
-                    e.getStackTrace();
+                String from = presence.getFrom().toString();
+
+                if(from.contains("/")){
+                    from = presence.getFrom().substring(0, presence.getFrom().indexOf('/'));
                 }
+
+                final String finalFrom = from;
+
+                mHandler.post(new Runnable() {
+                    public void run() {
+                        try {
+                            ContactListTab.setPresenceChanged(finalFrom, presence.getStatus() == null ? "Offline" : presence.getStatus().toString());
+                        }catch(Exception e){
+                            Log.d("Network", "Presence Changed  ERROR");
+                            e.getStackTrace();
+                        }
+                    }
+                });
             }
         });
     }
@@ -347,6 +345,7 @@ public class Network extends Application {
                 try {
                     // Log into the server
                     connection.disconnect();
+                    clreconnection = false;
                     if(connectionListener != null){
                         connection.removeConnectionListener(connectionListener);
                     }
