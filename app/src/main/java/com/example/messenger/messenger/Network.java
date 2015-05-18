@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.CountDownTimer;
+import android.os.Handler;
 import android.util.Log;
 
 import org.jivesoftware.smack.AbstractXMPPConnection;
@@ -26,28 +27,33 @@ import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
 /**
  * Created by Joubert on 09/05/2015.
- * Hay que terminar el metodo de borrar un roster.
- * hay que llenar la lista de contactos desde la base de datos.
- * Hay que agregar el metodo de onlongtouch para que aparezcan opciones.
+ * Hay que terminar el metodo de borrar un roster. Hay que terminar lo que sigue primero.
+ * Hay que agregar el metodo de onlongtouch para que aparezcan opciones. y asi poder borrar contacto por ahora...
+ * verificar para todas las cuentas
+ * hacer una revision general..
+ * Empezar de atras pa lante
  */
 public class Network extends Application {
 
     public AbstractXMPPConnection connection;
 
     private String HOST = "192.168.1.4";
-    private String SERVICE = "localhost";
-    private int PORT = 5222;
+    private String OPENFIRESERVICE = "localhost";
     private String RESOURCE = "Home";
+    private int PORT = 5222;
+    private boolean reconnection = false;
     private SharedPreferences.Editor editor;
     private ConnectionListener connectionListener;
-    private boolean reconnection = false;
     private Timer timer;
     private Roster roster;
+    private Handler mHandler = new Handler();
+    public static String SERVICE = "@localhost";
 
     public boolean isNetworkConnected() {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -59,39 +65,13 @@ public class Network extends Application {
             return true;
     }
 
-    public void connect(){
-
-        // Create the configuration for this new connection
-        XMPPTCPConnectionConfiguration.Builder configBuilder = XMPPTCPConnectionConfiguration.builder();
-        //configBuilder.setResource(RESOURCE);
-        configBuilder.setServiceName(SERVICE);
-        configBuilder.setHost(HOST);
-        configBuilder.setPort(PORT);
-        configBuilder.setSecurityMode(ConnectionConfiguration.SecurityMode.disabled);
-
-        connection = new XMPPTCPConnection(configBuilder.build());
-
-        new Thread(new Runnable() {
-            public void run() {
-                try {
-                    // Connect to the server
-                    connection.connect();
-                    Log.d("Network", "Successfully connected to: " + connection.getHost());
-                }catch (SmackException | IOException | XMPPException e){
-                    Log.d("Network",  "Error connecting");
-                    e.getStackTrace();
-                }
-            }
-        }).start();
-    }
-
-    public String login (String username, String password, boolean autoLogin, boolean reconnectionTimer){
+    public String login(String username, String password, boolean autoLogin, boolean reconnectionTimer){
         if((connection == null) || (!connection.isConnected() && !reconnection)){
             // Create the configuration for this new connection
             XMPPTCPConnectionConfiguration.Builder configBuilder = XMPPTCPConnectionConfiguration.builder();
-            configBuilder.setUsernameAndPassword(username+"@localhost", password);
+            configBuilder.setUsernameAndPassword(username, password);
             //configBuilder.setResource(RESOURCE);
-            configBuilder.setServiceName(SERVICE);
+            configBuilder.setServiceName(OPENFIRESERVICE);
             configBuilder.setHost(HOST);
             configBuilder.setPort(PORT);
             configBuilder.setSecurityMode(ConnectionConfiguration.SecurityMode.disabled);
@@ -115,6 +95,7 @@ public class Network extends Application {
                 try {
                     // Log into the server
                     connection.login();
+                    Log.d("Network", "Username: " + username);
                     Log.d("Network", "Logged in as: " + connection.getUser());
 
                     editor = LoginActivity.sharedPref.edit();
@@ -155,6 +136,7 @@ public class Network extends Application {
             }
         } else {
             Log.d("Network", "Already connected");
+            Log.d("Network", "Username: " + username);
             Log.d("Network", "Logged in as: " + connection.getUser());
 
             Intent intent = new Intent(getApplicationContext(), ChatListActivity.class);
@@ -228,10 +210,33 @@ public class Network extends Application {
             @Override
             public void entriesAdded(Collection<String> addresses) {
                 Log.d("Network", "Entries Added: " + addresses.toString());
-                String entry = addresses.toString().substring(1, addresses.toString().length() - 1);
+                final String entry = addresses.toString().substring(1, addresses.toString().length() - 1);
                 //Existe la posibilidad de hacer un metodo para aceptar los usuarios si queremos.
-                addRoster(entry);//Ya tiene el service
-                //Aca se deberian agregar los usuario que se agregan o que nos agregan a la DB local.
+
+                DatabaseHandler dbb = new DatabaseHandler(getApplicationContext());
+                List<Contact> contacts = dbb.getAllContacts();
+                dbb.close();
+
+                boolean found = false;
+
+                for(int i = 0; i < contacts.size(); i++){
+                    if(contacts.get(i).getContact().equals(entry) && contacts.get(i).getUser().equals(LoginActivity.sharedPref.getString("username", "default"))){
+                        found = true;
+                    }
+                }
+
+                if(!found){
+                    addRoster(entry);//Ya tiene el service
+                    DatabaseHandler db = new DatabaseHandler(getApplicationContext());
+                    db.addContact(new Contact(LoginActivity.sharedPref.getString("username", "default"), entry, " "));
+                    db.close();
+
+                    mHandler.post(new Runnable() {
+                        public void run() {
+                            ContactListTab.setContactListChanged(entry);
+                        }
+                    });
+                }
             }
 
             @Override
@@ -245,8 +250,30 @@ public class Network extends Application {
             }
 
             @Override
-            public void presenceChanged(Presence presence) {
+            public void presenceChanged(final Presence presence) {
                 Log.d("Network", "Presence Changed User: " + presence.getFrom() + " Status: " + presence.getStatus());
+                String from = "";
+                try {
+                    Log.d("Network", "Roster Type: " + roster.getEntry(presence.getFrom().substring(0, presence.getFrom().indexOf('/'))).getType());
+                    if(roster.getEntry(presence.getFrom().substring(0, presence.getFrom().indexOf('/'))).getType().toString().equals("both")) {
+                        from = presence.getFrom().substring(0, presence.getFrom().indexOf('/'));
+
+                        final String finalFrom = from;
+                        mHandler.post(new Runnable() {
+                            public void run() {
+                                try {
+                                    ContactListTab.setPresenceChanged(finalFrom, presence.getStatus() == null ? "Offline" : presence.getStatus().toString());
+                                }catch(Exception e){
+                                    Log.d("Network", "Presence Changed  ERROR");
+                                    e.getStackTrace();
+                                }
+                            }
+                        });
+                    }
+                }catch(Exception e){
+                    ContactListTab.setPresenceChanged(from, "Offline");
+                    e.getStackTrace();
+                }
             }
         });
     }
@@ -342,7 +369,7 @@ public class Network extends Application {
         alertDialogBuilder
                 .setMessage(message)
                 .setCancelable(false)
-                .setNeutralButton("Got it!",new DialogInterface.OnClickListener() {
+                .setNeutralButton("Got it!", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         dialog.cancel();
 

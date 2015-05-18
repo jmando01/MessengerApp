@@ -103,7 +103,7 @@ public class LoginActivity extends Activity {
 
             if(((Network) getApplication()).isNetworkConnected()){
                 Log.d("LoginActivity",  "networkOK");
-                result = ((Network) getApplication()).login(username, password, false, false);
+                result = ((Network) getApplication()).login(username+Network.SERVICE, password, false, false);
             }else{
                 //No network available
                 Log.d("LoginActivity", "No Network Available");

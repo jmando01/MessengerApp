@@ -11,6 +11,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.text.InputType;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -26,11 +27,14 @@ public class ChatListActivity extends FragmentActivity {
     private TabPagerAdapter TabAdapter;
     private ActionBar actionBar;
     private SharedPreferences.Editor editor;
+    public static boolean isRunning;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat_list);
+
+        isRunning = true;
 
         TabAdapter = new TabPagerAdapter(getSupportFragmentManager());
 
@@ -131,7 +135,7 @@ public class ChatListActivity extends FragmentActivity {
                         contact = addContactEdit.getText().toString();
                         new Thread(new Runnable() {
                             public void run() {
-                                notification[0] = ((Network) getApplication()).addRoster(contact + "@localhost");
+                                notification[0] = ((Network) getApplication()).addRoster(contact + Network.SERVICE);
                             }
                         }).start();
 
@@ -150,7 +154,12 @@ public class ChatListActivity extends FragmentActivity {
 
     }
 
-
+    @Override
+    protected void onPause(){
+        super.onPause();
+        Log.d("ChatListActivity", "onPause");
+        isRunning = false;
+    }
 
 
     @Override

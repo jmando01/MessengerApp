@@ -9,14 +9,14 @@ public class Contact {
     int _id;
     String _user;
     String _contact;
-    boolean _status;
+    String _status;
 
     // Empty constructor
     public Contact(){
 
     }
     // constructor
-    public Contact(int id, String user, String contact, Boolean status){
+    public Contact(int id, String user, String contact, String status){
         this._id = id;
         this._user = user;
         this._contact = contact;
@@ -24,7 +24,7 @@ public class Contact {
     }
 
     // constructor
-    public Contact(String user, String contact, Boolean status){
+    public Contact(String user, String contact, String status){
         this._user = user;
         this._contact = contact;
         this._status = status;
@@ -60,12 +60,12 @@ public class Contact {
     }
 
     // getting phone number
-    public Boolean getStatus(){
+    public String getStatus(){
         return this._status;
     }
 
     // setting phone number
-    public void setStatus(Boolean status){
+    public void setStatus(String status){
         this._status = status;
     }
 }

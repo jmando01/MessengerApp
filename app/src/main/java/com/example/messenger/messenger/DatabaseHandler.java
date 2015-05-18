@@ -58,7 +58,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 + KEY_ID + " INTEGER PRIMARY KEY,"
                 + KEY_USER + " TEXT,"
                 + KEY_CONTACT + " TEXT,"
-                + KEY_STATUS + " INTEGER " + ")";
+                + KEY_STATUS + " TEXT " + ")";
         db.execSQL(CREATE_CONTACTS_TABLE);
 
         String CREATE_CHAT_CONTACTS_TABLE = "CREATE TABLE " + CHATS_TABLE + "("
@@ -104,7 +104,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(KEY_USER, contact.getUser());
         values.put(KEY_CONTACT, contact.getContact());
-        values.put(KEY_STATUS, (contact.getStatus()) ? 1 : 0);
+        values.put(KEY_STATUS, contact.getStatus());
         // Inserting Row
         db.insert(CONTACTS_TABLE, null, values);
         db.close();
@@ -149,7 +149,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         if (cursor != null)
             cursor.moveToFirst();
         Contact contact = new Contact(Integer.parseInt(cursor.getString(0)),
-                cursor.getString(1), cursor.getString(2), (cursor.getInt(3) != 0));
+                cursor.getString(1), cursor.getString(2), cursor.getString(3));
         // return contact
         cursor.close();
         db.close();
@@ -215,7 +215,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 contact.setID(Integer.parseInt(cursor.getString(0)));
                 contact.setUser(cursor.getString(1));
                 contact.setContact(cursor.getString(2));
-                contact.setStatus((cursor.getInt(3) != 0));
+                contact.setStatus(cursor.getString(3));
 
                 // Adding contact to list
                 contactList.add(contact);
@@ -272,7 +272,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(KEY_USER, contact.getUser());
         values.put(KEY_CONTACT, contact.getContact());
-        values.put(KEY_STATUS, (contact.getStatus()) ? 1 : 0);
+        values.put(KEY_STATUS, contact.getStatus());
         // updating row
         db.update(CONTACTS_TABLE, values, KEY_ID + " = ?",
                 new String[] { String.valueOf(contact.getID()) });
