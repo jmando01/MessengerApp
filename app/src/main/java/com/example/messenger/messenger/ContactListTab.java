@@ -36,14 +36,15 @@ public class ContactListTab extends Fragment {
 		 temp = new ArrayList<Contact>();
 		 contacts = new ArrayList<Contact>();
 
-		 context = getActivity();
+		 context = getActivity().getApplication();
 
-		 DatabaseHandler db = new DatabaseHandler(getActivity());
+		 DatabaseHandler db = new DatabaseHandler(getActivity().getApplication());
 		 temp = (ArrayList<Contact>) db.getAllContacts();
 		 db.close();
 
 		 for(int i = 0; i < temp.size(); i ++){
 			 if(temp.get(i).getUser().equals(LoginActivity.sharedPref.getString("username", "default"))){
+				 Log.d("ContactTabList", "Contact List: " + temp.get(i).getContact());
 				contacts.add(temp.get(i));
 			 }
 		 }
@@ -69,7 +70,7 @@ public class ContactListTab extends Fragment {
 
 				 CharSequence[] items = {"Send a Message", "Delete Contact"};
 
-				 AlertDialog.Builder builder = new AlertDialog.Builder(context);
+				 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 				 builder.setTitle("Make your selection");
 				 builder.setItems(items, new DialogInterface.OnClickListener() {
 					 public void onClick(DialogInterface dialog, int item) {
@@ -78,26 +79,28 @@ public class ContactListTab extends Fragment {
 						 }
 						 if (item == 1) {
 
-							 if (((Network) context.getApplicationContext()).connection.isConnected()) {
+							 if (((Network) getActivity().getApplicationContext()).connection.isConnected()) {
 								 //Aqui debe ir el codigo para borrar un contacto.
 
 								 new Thread(new Runnable() {
 									 public void run() {
 										 final String notification;
 
-										 notification = ((Network) context.getApplicationContext()).removeRoster(contact.getContact());
+										 notification = ((Network) getActivity().getApplicationContext()).removeRoster(contact.getContact());
 
 										 mHandler.post(new Runnable() {
 											 public void run() {
 												 if (!notification.equals("success")) {
-													 ((Network) context.getApplicationContext()).showAlertDialog("Notification!", notification, context.getApplicationContext());
+													 ((Network) getActivity().getApplicationContext()).showAlertDialog("Notification!", notification, getActivity().getApplicationContext());
+												 }else{
+													 setRemoveContactFromContactList(contact.getContact());
 												 }
 											 }
 										 });
 									 }
 								 }).start();
 							 }else{
-								 Toast.makeText(context,
+								 Toast.makeText(getActivity(),
 										 "Please wait for reconnection", Toast.LENGTH_LONG)
 										 .show();
 							 }
@@ -130,6 +133,22 @@ public class ContactListTab extends Fragment {
 		Log.d("ContactTabList", "Contact List Changed: " + contact);
 			contacts.add(new Contact(LoginActivity.sharedPref.getString("username", "default"), contact, " "));
 			adapter.notifyDataSetChanged();
+	}
+
+	public void setRemoveContactFromContactList(String contact){
+		for(int i = 0; i < contacts.size(); i++){
+			if(contact.equals(contacts.get(i).getContact())){
+
+				DatabaseHandler db = new DatabaseHandler(context);
+				//para borrar un usuario solo es necesario el ID
+				db.deleteContact(new Contact(contacts.get(i).getID(), "", "", ""));
+				db.close();
+
+				contacts.remove(i);
+				adapter.notifyDataSetChanged();
+				Log.d("Network", "User: " + contact + " has been removed2.");
+			}
+		}
 	}
 }
 

@@ -54,6 +54,8 @@ public class Network extends Application {
     private Roster roster;
     private Handler mHandler = new Handler();
     public static String SERVICE = "@localhost";
+    private ArrayList<Contact> temp;
+    private ArrayList<Contact> contacts;
 
     public boolean isNetworkConnected() {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -210,32 +212,10 @@ public class Network extends Application {
         roster.addRosterListener(new RosterListener() {
             @Override
             public void entriesAdded(Collection<String> addresses) {
-
                 Log.d("Network", "Entries added: " + addresses);
 
-                ArrayList<Contact> temp = new ArrayList<Contact>();
-                ArrayList<Contact> contacts = new ArrayList<Contact>();
-
-                DatabaseHandler dbb = new DatabaseHandler(getApplicationContext());
-                temp = (ArrayList<Contact>) dbb.getAllContacts();
-                dbb.close();
-
-                for(int i = 0; i < temp.size(); i ++){
-                    if(temp.get(i).getUser().equals(LoginActivity.sharedPref.getString("username", "default"))){
-                        contacts.add(temp.get(i));
-                    }
-                }
-
                 for (String entry : addresses) {
-                    boolean found = false;
-                    for(int i = 0; i < contacts.size(); i++){
-                        if(contacts.get(i).getContact().equals(entry)){
-                            found = true;
-                        }
-                    }
-                    if(!found){
-                        addRoster(entry);//Ya tiene el service
-                    }
+                    addRoster(entry);
                 }
             }
 
@@ -275,22 +255,47 @@ public class Network extends Application {
         });
     }
 
-    public String addRoster(final String username){
+    public String addRoster(final String contact){
         //Lo que esta en null es para saber si pertenece a un grupo
         try {
-            roster.createEntry(username, username, null);
+            roster.createEntry(contact, contact, null);
 
-            DatabaseHandler db = new DatabaseHandler(getApplicationContext());
-            db.addContact(new Contact(LoginActivity.sharedPref.getString("username", "default"), username, " "));
-            db.close();
+            temp = new ArrayList<Contact>();
+            contacts = new ArrayList<Contact>();
 
-            mHandler.post(new Runnable() {
-                public void run() {
-                    ContactListTab.setContactListChanged(username);
+            DatabaseHandler dbb = new DatabaseHandler(getApplicationContext());
+            temp = (ArrayList<Contact>) dbb.getAllContacts();
+            dbb.close();
+
+            for(int i = 0; i < temp.size(); i ++){
+                if(temp.get(i).getUser().equals(LoginActivity.sharedPref.getString("username", "default"))){
+                    contacts.add(temp.get(i));
                 }
-            });
+            }
 
-            Log.d("Network", "User: " + username + " has been added.");
+            boolean found = false;
+
+            for(int i = 0; i < contacts.size(); i ++){
+                if(contacts.get(i).getContact().equals(contact)){
+                    found = true;
+                }
+            }
+
+            if(!found){
+                DatabaseHandler db = new DatabaseHandler(getApplicationContext());
+                db.addContact(new Contact(LoginActivity.sharedPref.getString("username", "default"), contact, " "));
+                db.close();
+
+                mHandler.post(new Runnable() {
+                    public void run() {
+                        ContactListTab.setContactListChanged(contact);
+                    }
+                });
+                Log.d("Network", "User: " + contact + " has been added.");
+            }else{
+                Log.d("Network", "This contact already exist");
+            }
+
             return "success";
         } catch (SmackException.NotLoggedInException e) {
             Log.d("Network", "NotLoggedInException");
@@ -311,10 +316,10 @@ public class Network extends Application {
         }
     }
 
-    public String removeRoster(String username){
+    public String removeRoster(String contact){
         try {
-            roster.removeEntry(roster.getEntry(username));
-            Log.d("Network", "User: "+username+" has beem removed.");
+            roster.removeEntry(roster.getEntry(contact));
+            Log.d("Network", "User: "+contact+" has been removed1.");
             return "success";
         } catch (SmackException.NotLoggedInException e) {
             Log.d("Network", "NotLoggedInException");

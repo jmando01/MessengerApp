@@ -146,10 +146,6 @@ public class ChatListActivity extends FragmentActivity {
                                         public void run() {
                                             if (!notification.equals("success")) {
                                                 ((Network) getApplication()).showAlertDialog("Notification", notification, ChatListActivity.this);
-                                            } else {
-                                                Toast.makeText(ChatListActivity.this,
-                                                        "The user " + contact + " has been added successfully.", Toast.LENGTH_LONG)
-                                                        .show();
                                             }
                                         }
                                     });
