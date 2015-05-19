@@ -81,7 +81,7 @@ public class LoginActivity extends Activity {
 
     class AttemptLogin extends AsyncTask<Void, Void, String> {
 
-        private String result = "";
+        private String notification = "";
 
         @Override
         protected void onPreExecute() {
@@ -103,24 +103,24 @@ public class LoginActivity extends Activity {
 
             if(((Network) getApplication()).isNetworkConnected()){
                 Log.d("LoginActivity",  "networkOK");
-                result = ((Network) getApplication()).login(username+Network.SERVICE, password, false, false);
+                notification = ((Network) getApplication()).login(username+Network.SERVICE, password, false, false);
             }else{
                 //No network available
                 Log.d("LoginActivity", "No Network Available");
                 return "No Network Available. Verify is you are connected to Internet and try again.";
             }
 
-            return result;
+            return notification;
 
         }
         /**
          * After completing background task Dismiss the progress dialog
          * **/
-        protected void onPostExecute(String result) {
+        protected void onPostExecute(String notification) {
             // dismiss the dialog once product deleted
             pDialog.dismiss();
-            if(result != null){
-                ((Network) getApplication()).showAlertDialog("Notification!", result, LoginActivity.this);
+            if(!notification.equals("success")){
+                ((Network) getApplication()).showAlertDialog("Notification!", notification, LoginActivity.this);
             }
         }
     }

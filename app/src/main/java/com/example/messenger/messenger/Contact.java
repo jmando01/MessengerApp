@@ -6,10 +6,10 @@ package com.example.messenger.messenger;
 public class Contact {
 
     //private variables
-    int _id;
-    String _user;
-    String _contact;
-    String _status;
+    private int _id;
+    private String _user;
+    private String _contact;
+    private String _status;
 
     // Empty constructor
     public Contact(){
@@ -29,42 +29,35 @@ public class Contact {
         this._contact = contact;
         this._status = status;
     }
-    // getting ID
+
     public int getID(){
         return this._id;
     }
 
-    // setting id
     public void setID(int id){
         this._id = id;
     }
 
-    // getting name
     public String getUser(){
         return this._user;
     }
 
-    // setting name
     public void setUser(String user){
         this._user = user;
     }
 
-    // getting phone number
     public String getContact(){
         return this._contact;
     }
 
-    // setting phone number
     public void setContact(String contact){
         this._contact = contact;
     }
 
-    // getting phone number
     public String getStatus(){
         return this._status;
     }
 
-    // setting phone number
     public void setStatus(String status){
         this._status = status;
     }

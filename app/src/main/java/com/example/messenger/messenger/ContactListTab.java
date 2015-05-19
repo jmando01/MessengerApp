@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -21,6 +22,7 @@ import java.util.List;
 public class ContactListTab extends Fragment {
 
 	private ArrayList<Contact> temp;
+	private Handler mHandler = new Handler();
 	public static ContactListBaseAdapter adapter = null;
 	public static ArrayList<Contact> contacts;
 	public static Context context;
@@ -29,7 +31,7 @@ public class ContactListTab extends Fragment {
 	    public View onCreateView(LayoutInflater inflater, ViewGroup container,
 	            Bundle savedInstanceState) {
 
-		 View contactlisttab = inflater.inflate(R.layout.contact_list_frag, container, false);
+		 View contactListTab = inflater.inflate(R.layout.contact_list_frag, container, false);
 
 		 temp = new ArrayList<Contact>();
 		 contacts = new ArrayList<Contact>();
@@ -46,47 +48,69 @@ public class ContactListTab extends Fragment {
 			 }
 		 }
 
-		 final ListView lv1 = (ListView) contactlisttab.findViewById(R.id.contactListLv);
+		 final ListView lv1 = (ListView) contactListTab.findViewById(R.id.contactListLv);
 		 adapter = new ContactListBaseAdapter(getActivity(), contacts);
 		 lv1.setAdapter(adapter);
 
 		 lv1.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			 @Override
 			 public void onItemClick(AdapterView<?> a, View v, int position, long id) {
-				 Object o = lv1.getItemAtPosition(position);
-				 Contact contact = (Contact)o;
 
-				 //Aqui va el codigo para enviar mensaje a contacto.
+				 Contact contact = contacts.get(position);
+
 			 }
 		 });
 
-		 lv1.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener(){
+		 lv1.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
 			 @Override
 			 public boolean onItemLongClick(AdapterView<?> parent, final View view, int position, long id) {
-				 Object o = lv1.getItemAtPosition(position);
-				 final Contact contact = (Contact)o;
 
-				 final CharSequence[] items = {"Send a Message", "Delete Contact"};
+				 final Contact contact = contacts.get(position);
+
+				 CharSequence[] items = {"Send a Message", "Delete Contact"};
 
 				 AlertDialog.Builder builder = new AlertDialog.Builder(context);
 				 builder.setTitle("Make your selection");
 				 builder.setItems(items, new DialogInterface.OnClickListener() {
 					 public void onClick(DialogInterface dialog, int item) {
-						 if(item == 0){
+						 if (item == 0) {
 							 //Aqui debe ir el codigo para enviar un mensaje al contacto.
 						 }
+						 if (item == 1) {
 
-						 if(item == 1){
-							//Aqui debe ir el codigo para borrar un contacto.
+							 if (((Network) context.getApplicationContext()).connection.isConnected()) {
+								 //Aqui debe ir el codigo para borrar un contacto.
+
+								 new Thread(new Runnable() {
+									 public void run() {
+										 final String notification;
+
+										 notification = ((Network) context.getApplicationContext()).removeRoster(contact.getContact());
+
+										 mHandler.post(new Runnable() {
+											 public void run() {
+												 if (!notification.equals("success")) {
+													 ((Network) context.getApplicationContext()).showAlertDialog("Notification!", notification, context.getApplicationContext());
+												 }
+											 }
+										 });
+									 }
+								 }).start();
+							 }else{
+								 Toast.makeText(context,
+										 "Please wait for reconnection", Toast.LENGTH_LONG)
+										 .show();
+							 }
 						 }
 					 }
 				 });
 				 AlertDialog alert = builder.create();
 				 alert.show();
 				 return true; //Esto sirve para que no se abran ambos metodos de ontouch
-			 }} );
+			 }
+		 });
 
-		 return contactlisttab;
+		 return contactListTab;
 	 }
 
 	public static void setPresenceChanged(String contact, String status){

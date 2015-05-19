@@ -44,7 +44,13 @@ public class StatusActivity extends Activity {
                 // When clicked, show a toast with the TextView text
 
                 status = (String) parent.getItemAtPosition(position);
-                new ChangeStatus().execute();
+                if(((Network) getApplication()).connection.isConnected()){
+                    new ChangeStatus().execute();
+                }else{
+                    Toast.makeText(getApplication(),
+                            "Please wait for reconnection", Toast.LENGTH_LONG)
+                            .show();
+                }
             }
         });
     }
@@ -98,7 +104,13 @@ public class StatusActivity extends Activity {
 
     public void changeStatusBtn(View view){
         status = currentStatus.getText().toString();
-        new ChangeStatus().execute();
+        if(((Network) getApplication()).connection.isConnected()){
+            new ChangeStatus().execute();
+        }else{
+            Toast.makeText(getApplication(),
+                    "Please wait for reconnection", Toast.LENGTH_LONG)
+                    .show();
+        }
     }
 
     @Override

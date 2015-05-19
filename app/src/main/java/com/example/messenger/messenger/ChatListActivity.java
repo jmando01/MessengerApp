@@ -6,6 +6,7 @@ import android.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
@@ -27,14 +28,12 @@ public class ChatListActivity extends FragmentActivity {
     private TabPagerAdapter TabAdapter;
     private ActionBar actionBar;
     private SharedPreferences.Editor editor;
-    public static boolean isRunning;
+    private Handler mHandler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat_list);
-
-        isRunning = true;
 
         TabAdapter = new TabPagerAdapter(getSupportFragmentManager());
 
@@ -90,10 +89,15 @@ public class ChatListActivity extends FragmentActivity {
         editor.commit();
 
         finish();
-        ((Network) getApplication()).disconect();
 
         Intent intent = new Intent(this, LoginActivity.class);
         startActivity(intent);
+
+        new Thread(new Runnable() {
+            public void run() {
+                ((Network) getApplication()).disconect();
+            }
+        }).start();
     }
 
     public void statusBtn(MenuItem item){
@@ -105,62 +109,63 @@ public class ChatListActivity extends FragmentActivity {
     }
 
     public void addContactBtn(MenuItem item){
-        LinearLayout lila1= new LinearLayout(ChatListActivity.this);
-        lila1.setOrientation(LinearLayout.VERTICAL);
+        if(((Network) getApplicationContext()).connection.isConnected()){
 
-        final EditText addContactEdit = new EditText(ChatListActivity.this);
-        addContactEdit.setHint("Add Contact");
-        addContactEdit.setGravity(Gravity.CENTER);
-        addContactEdit.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PERSON_NAME);
+            LinearLayout lila1 = new LinearLayout(ChatListActivity.this);
+            lila1.setOrientation(LinearLayout.VERTICAL);
 
-        lila1.addView(addContactEdit);
+            final EditText addContactEdit = new EditText(ChatListActivity.this);
+            addContactEdit.setHint("Add Contact");
+            addContactEdit.setGravity(Gravity.CENTER);
+            addContactEdit.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PERSON_NAME);
 
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(ChatListActivity.this);
-        alertDialogBuilder
-                .setTitle("Add a new contact")
-                .setView(lila1)
-                //.setIcon(R.drawable.ic_action_add_person)
-                //.setMessage("Add a new contact")
-                .setCancelable(false)
-                .setNeutralButton("Cancel", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.cancel();
-                    }
-                })
-                .setPositiveButton("Add Contact!", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        final String contact;
-                        final String[] notification = new String[1];
+            lila1.addView(addContactEdit);
 
-                        contact = addContactEdit.getText().toString();
-                        new Thread(new Runnable() {
-                            public void run() {
-                                notification[0] = ((Network) getApplication()).addRoster(contact + Network.SERVICE);
-                            }
-                        }).start();
-
-                        if(notification[0] != null){
-                            ((Network) getApplication()).showAlertDialog("Notification", notification[0], ChatListActivity.this);
-                        }else{
-                            Toast.makeText(ChatListActivity.this,
-                                    "The user "+ contact + "has been added successfully.", Toast.LENGTH_LONG)
-                                    .show();
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(ChatListActivity.this);
+            alertDialogBuilder
+                    .setTitle("Add a new contact")
+                    .setView(lila1)
+                            //.setIcon(R.drawable.ic_action_add_person)
+                            //.setMessage("Add a new contact")
+                    .setCancelable(false)
+                    .setNeutralButton("Cancel", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.cancel();
                         }
-                    }
-                });
+                    })
+                    .setPositiveButton("Add Contact!", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            final String contact;
 
-        AlertDialog alertDialog = alertDialogBuilder.create();
-        alertDialog.show();
+                            contact = addContactEdit.getText().toString();
+                            new Thread(new Runnable() {
+                                public void run() {
+                                    final String notification;
+                                    notification = ((Network) getApplication()).addRoster(contact + Network.SERVICE);
+                                    mHandler.post(new Runnable() {
+                                        public void run() {
+                                            if (!notification.equals("success")) {
+                                                ((Network) getApplication()).showAlertDialog("Notification", notification, ChatListActivity.this);
+                                            } else {
+                                                Toast.makeText(ChatListActivity.this,
+                                                        "The user " + contact + " has been added successfully.", Toast.LENGTH_LONG)
+                                                        .show();
+                                            }
+                                        }
+                                    });
+                                }
+                            }).start();
+                        }
+                    });
 
+            AlertDialog alertDialog = alertDialogBuilder.create();
+            alertDialog.show();
+        }else{
+            Toast.makeText(getApplicationContext(),
+                    "Please wait for reconnection", Toast.LENGTH_LONG)
+                    .show();
+        }
     }
-
-    @Override
-    protected void onPause(){
-        super.onPause();
-        Log.d("ChatListActivity", "onPause");
-        isRunning = false;
-    }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

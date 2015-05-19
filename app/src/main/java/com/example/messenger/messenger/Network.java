@@ -26,6 +26,7 @@ import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Timer;
@@ -35,6 +36,8 @@ import java.util.TimerTask;
  * Created by Joubert on 09/05/2015.
  * Hay que terminar el metodo de borrar un roster.
  * Hay que hace un buscador para los contactos.
+ * Error agregando contactos
+ * Se pasa dos veces por add roster cuando se agrega localmente... no da problema
  */
 public class Network extends Application {
 
@@ -115,7 +118,7 @@ public class Network extends Application {
 
                         LoginActivity.activity.finish();
                     }
-                    return null;
+                    return "success";
                 }catch(SmackException | IOException | XMPPException e){
                     Log.d("Network", "Error logging in");
                     e.getStackTrace();
@@ -207,33 +210,32 @@ public class Network extends Application {
         roster.addRosterListener(new RosterListener() {
             @Override
             public void entriesAdded(Collection<String> addresses) {
-                Log.d("Network", "Entries Added: " + addresses.toString());
-                final String entry = addresses.toString().substring(1, addresses.toString().length() - 1);
-                //Existe la posibilidad de hacer un metodo para aceptar los usuarios si queremos.
+
+                Log.d("Network", "Entries added: " + addresses);
+
+                ArrayList<Contact> temp = new ArrayList<Contact>();
+                ArrayList<Contact> contacts = new ArrayList<Contact>();
 
                 DatabaseHandler dbb = new DatabaseHandler(getApplicationContext());
-                List<Contact> contacts = dbb.getAllContacts();
+                temp = (ArrayList<Contact>) dbb.getAllContacts();
                 dbb.close();
 
-                boolean found = false;
-
-                for(int i = 0; i < contacts.size(); i++){
-                    if(contacts.get(i).getContact().equals(entry) && contacts.get(i).getUser().equals(LoginActivity.sharedPref.getString("username", "default"))){
-                        found = true;
+                for(int i = 0; i < temp.size(); i ++){
+                    if(temp.get(i).getUser().equals(LoginActivity.sharedPref.getString("username", "default"))){
+                        contacts.add(temp.get(i));
                     }
                 }
 
-                if(!found){
-                    addRoster(entry);//Ya tiene el service
-                    DatabaseHandler db = new DatabaseHandler(getApplicationContext());
-                    db.addContact(new Contact(LoginActivity.sharedPref.getString("username", "default"), entry, " "));
-                    db.close();
-
-                    mHandler.post(new Runnable() {
-                        public void run() {
-                            ContactListTab.setContactListChanged(entry);
+                for (String entry : addresses) {
+                    boolean found = false;
+                    for(int i = 0; i < contacts.size(); i++){
+                        if(contacts.get(i).getContact().equals(entry)){
+                            found = true;
                         }
-                    });
+                    }
+                    if(!found){
+                        addRoster(entry);//Ya tiene el service
+                    }
                 }
             }
 
@@ -273,11 +275,23 @@ public class Network extends Application {
         });
     }
 
-    public String addRoster(String username){
+    public String addRoster(final String username){
         //Lo que esta en null es para saber si pertenece a un grupo
         try {
             roster.createEntry(username, username, null);
-            return null;
+
+            DatabaseHandler db = new DatabaseHandler(getApplicationContext());
+            db.addContact(new Contact(LoginActivity.sharedPref.getString("username", "default"), username, " "));
+            db.close();
+
+            mHandler.post(new Runnable() {
+                public void run() {
+                    ContactListTab.setContactListChanged(username);
+                }
+            });
+
+            Log.d("Network", "User: " + username + " has been added.");
+            return "success";
         } catch (SmackException.NotLoggedInException e) {
             Log.d("Network", "NotLoggedInException");
             e.printStackTrace();
@@ -300,7 +314,8 @@ public class Network extends Application {
     public String removeRoster(String username){
         try {
             roster.removeEntry(roster.getEntry(username));
-            return null;
+            Log.d("Network", "User: "+username+" has beem removed.");
+            return "success";
         } catch (SmackException.NotLoggedInException e) {
             Log.d("Network", "NotLoggedInException");
             e.printStackTrace();

@@ -160,7 +160,7 @@ public class RegisterActivity extends Activity {
                             Log.d("RegisterActivity",  "networkOK");
                             String notification;
                             notification = ((Network) RegisterActivity.this.getApplication()).login(username+Network.SERVICE, password, true, false);
-                            if(notification == null){
+                            if(notification.equals("success")){
                                 finish();
                             }else{
                                 ((Network) getApplication()).showAlertDialog("Notification!", notification, RegisterActivity.this);
