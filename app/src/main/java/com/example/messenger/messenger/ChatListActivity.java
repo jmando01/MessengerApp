@@ -104,8 +104,14 @@ public class ChatListActivity extends FragmentActivity {
         Intent intent = new Intent(this, StatusActivity.class);
         startActivity(intent);
     }
+
     public void searchBtn(MenuItem item){
 
+    }
+
+    public void settingsBtn(MenuItem item){
+        Intent intent = new Intent(this, SettingsActivity.class);
+        startActivity(intent);
     }
 
     public void addContactBtn(MenuItem item){

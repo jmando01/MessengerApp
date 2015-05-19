@@ -34,10 +34,8 @@ import java.util.TimerTask;
 
 /**
  * Created by Joubert on 09/05/2015.
- * Hay que terminar el metodo de borrar un roster.
+ * Hay que terminar el metodo de borrar un roster. Esta implementado ahora hay que ver que pasa cuando envian un mensaje...o un cambio de estado
  * Hay que hace un buscador para los contactos.
- * Error agregando contactos
- * Se pasa dos veces por add roster cuando se agrega localmente... no da problema
  */
 public class Network extends Application {
 
@@ -53,9 +51,10 @@ public class Network extends Application {
     private Timer timer;
     private Roster roster;
     private Handler mHandler = new Handler();
-    public static String SERVICE = "@localhost";
     private ArrayList<Contact> temp;
     private ArrayList<Contact> contacts;
+
+    public static String SERVICE = "@localhost";
 
     public boolean isNetworkConnected() {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -123,6 +122,7 @@ public class Network extends Application {
                     return "success";
                 }catch(SmackException | IOException | XMPPException e){
                     Log.d("Network", "Error logging in");
+                    disconect();
                     e.getStackTrace();
                     return "Your username or password is wrong.";
                 }
@@ -147,7 +147,7 @@ public class Network extends Application {
             startActivity(intent);
 
             LoginActivity.activity.finish();
-            return "The is already a connection";
+            return "success";
         }
     }
 
@@ -244,7 +244,11 @@ public class Network extends Application {
                 mHandler.post(new Runnable() {
                     public void run() {
                         try {
-                            ContactListTab.setPresenceChanged(finalFrom, presence.getStatus() == null ? "Offline" : presence.getStatus().toString());
+                            if(presence.getStatus() != null){
+                                ContactListTab.setPresenceChanged(finalFrom, presence.getStatus());
+                            }else{
+                                ContactListTab.setPresenceChanged(finalFrom, "Offline");
+                            }
                         }catch(Exception e){
                             Log.d("Network", "Presence Changed  ERROR");
                             e.getStackTrace();
