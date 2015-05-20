@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+    <ImageView
+        android:id="@+id/image"
+        android:layout_width="72dip"
+        android:layout_height="72dip"
+        android:layout_margin="3dip"
+        android:adjustViewBounds="true"
+        android:scaleType="centerCrop" />
+
+    <TextView
+        android:id="@+id/sentDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginRight="25dp"
+        android:text="sentDate"
+        android:textColor="#696969"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/counter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/sentDate"
+        android:layout_below="@+id/sentDate"
+        android:text="counter"
+        android:textColor="#0000ff" />
+
+    <TextView
+        android:id="@+id/body"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/chat"
+        android:layout_below="@+id/counter"
+        android:text="body"
+        android:textColor="#696969" />
+
+    <TextView
+        android:id="@+id/chat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/counter"
+        android:layout_toRightOf="@+id/image"
+        android:text="chat"
+        android:textColor="#000000"
+        android:textSize="19sp"
+        android:textStyle="bold" />
+
+</RelativeLayout>

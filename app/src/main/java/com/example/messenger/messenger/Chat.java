@@ -7,46 +7,70 @@ public class Chat {
     //private variables
 
     int _id;
-    String _user;
-    String _chat;
+    private String _user;
+    private String _chat;
+    private String _body;
+    private String _sentDate;
+    private String _counter;
 
     // Empty constructor
     public Chat(){
 
     }
+
     // constructor
-    public Chat(int id, String user, String chat){
+    public Chat(int id, String user, String chat, String body, String sentDate, String counter){
         this._id = id;
         this._user = user;
         this._chat = chat;
+        this._body = body;
+        this._sentDate = sentDate;
+        this._counter = counter;
     }
+
     // constructor
-    public Chat(String user, String chat){
+    public Chat(String user, String chat, String body, String sentDate, String counter){
         this._user = user;
         this._chat = chat;
+        this._body = body;
+        this._sentDate = sentDate;
+        this._counter = counter;
     }
-    // getting ID
+
     public int getID(){
         return this._id;
     }
-    // setting id
     public void setID(int id){
         this._id = id;
     }
-    // getting User
     public String getUser(){
         return this._user;
     }
-    // setting User
     public void setUser(String user){
         this._user = user;
     }
-    // getting name
     public String getChat(){
         return this._chat;
     }
-    // setting name
     public void setChat(String chat){
         this._chat = chat;
+    }
+    public String getBody() {
+        return _body;
+    }
+    public void setBody(String body) {
+        this._body = body;
+    }
+    public String getSentDate() {
+        return _sentDate;
+    }
+    public void setSentDate(String sentDate) {
+        this._sentDate = sentDate;
+    }
+    public String getCounter(){
+        return _counter;
+    }
+    public void setCounter(String counter){
+        this._counter = counter;
     }
 }

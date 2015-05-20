@@ -38,6 +38,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     //Chats Table Colums
     private static final String KEY_CHAT = "chat";
+    private static final String KEY_COUNTER = "counter";
 
     public DatabaseHandler(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -64,7 +65,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         String CREATE_CHAT_CONTACTS_TABLE = "CREATE TABLE " + CHATS_TABLE + "("
                 + KEY_ID + " INTEGER PRIMARY KEY,"
                 + KEY_USER + " TEXT,"
-                + KEY_CHAT + " TEXT " + ")";
+                + KEY_CHAT + " TEXT,"
+                + KEY_BODY + " TEXT,"
+                + KEY_SENTDATE + " TEXT,"
+                + KEY_COUNTER + " TEXT " + ")";
         db.execSQL(CREATE_CHAT_CONTACTS_TABLE);
     }
 
@@ -160,12 +164,14 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     Chat getChat(int id) {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.query(CHATS_TABLE, new String[]{KEY_ID,
-                        KEY_USER, KEY_CHAT}, KEY_ID + "=?",
+                        KEY_USER, KEY_CHAT, KEY_BODY, KEY_SENTDATE,
+                        KEY_COUNTER}, KEY_ID + "=?",
                 new String[]{String.valueOf(id)}, null, null, null, null);
         if (cursor != null)
             cursor.moveToFirst();
         Chat chat = new Chat(Integer.parseInt(cursor.getString(0)),
-                cursor.getString(1), cursor.getString(2));
+                cursor.getString(1), cursor.getString(2), cursor.getString(3),
+                cursor.getString(4), cursor.getString(5));
         // return contact
         cursor.close();
         db.close();
@@ -241,6 +247,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 chatContact.setID(Integer.parseInt(cursor.getString(0)));
                 chatContact.setUser(cursor.getString(1));
                 chatContact.setChat(cursor.getString(2));
+                chatContact.setBody(cursor.getString(3));
+                chatContact.setSentDate(cursor.getString(4));
+                chatContact.setCounter(cursor.getString(5));
                 // Adding contact to list
                 chatList.add(chatContact);
             } while (cursor.moveToNext());
@@ -285,9 +294,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(KEY_USER, chat.getUser());
         values.put(KEY_CHAT, chat.getChat());
+        values.put(KEY_BODY, chat.getBody());
+        values.put(KEY_SENTDATE, chat.getSentDate());
+        values.put(KEY_COUNTER, chat.getCounter());
         // updating row
         db.update(CHATS_TABLE, values, KEY_ID + " = ?",
-                new String[] { String.valueOf(chat.getID()) });
+                new String[]{String.valueOf(chat.getID()) });
         db.close();
     }
 

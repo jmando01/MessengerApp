@@ -1,7 +1,7 @@
 package com.example.messenger.messenger;
 
 /**
- * Created by Joubert on 17/05/2015.
+ * Created by Joubert on 19/05/2015.
  */
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -14,9 +14,9 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 
-public class ContactListBaseAdapter  extends BaseAdapter {
+public class ChatListBaseAdapter  extends BaseAdapter {
 
-    private static ArrayList<Contact> contactArrayList;
+    private static ArrayList<Chat> chatArrayList;
 
     private Integer[] imgid = {
             R.drawable.ic_action_person,
@@ -25,23 +25,23 @@ public class ContactListBaseAdapter  extends BaseAdapter {
 
     private LayoutInflater l_Inflater;
 
-    public ContactListBaseAdapter(Context context, ArrayList<Contact> results) {
-        contactArrayList = results;
+    public ChatListBaseAdapter(Context context, ArrayList<Chat> results) {
+        chatArrayList = results;
         l_Inflater = LayoutInflater.from(context);
     }
 
-    public void removeContact(Contact contact){
-        contactArrayList.remove(contact);
+    public void removeContact(Chat chat){
+        chatArrayList.remove(chat);
         notifyDataSetChanged();
     }
 
-    public void addContact(Contact contact) {
-        contactArrayList.add(contact);
+    public void addContact(Chat chat) {
+        chatArrayList.add(chat);
         notifyDataSetChanged();
     }
 
     public int getCount() {
-        return contactArrayList.size();
+        return chatArrayList.size();
     }
 
     @Override
@@ -57,27 +57,33 @@ public class ContactListBaseAdapter  extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolder holder;
         if (convertView == null) {
-            convertView = l_Inflater.inflate(R.layout.contact_view, null);
+            convertView = l_Inflater.inflate(R.layout.chat_view, null);
             holder = new ViewHolder();
-            holder.txt_contact = (TextView) convertView.findViewById(R.id.contact);
-            holder.txt_status = (TextView) convertView.findViewById(R.id.status);
+            holder.txt_chat = (TextView) convertView.findViewById(R.id.chat);
+            holder.txt_body = (TextView) convertView.findViewById(R.id.body);
+            holder.txt_sentDate = (TextView) convertView.findViewById(R.id.sentDate);
+            holder.txt_counter = (TextView) convertView.findViewById(R.id.counter);
             holder.image = (ImageView) convertView.findViewById(R.id.image);
 
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
-
-        holder.txt_contact.setText((contactArrayList.get(position).getContact()));
-        holder.txt_status.setText((contactArrayList.get(position).getStatus()));
+        holder.txt_chat.setText((chatArrayList.get(position).getChat()));
+        holder.txt_body.setText((chatArrayList.get(position).getBody()));
+        holder.txt_sentDate.setText((chatArrayList.get(position).getSentDate()));
+        holder.txt_counter.setText((chatArrayList.get(position).getCounter()));
         holder.image.setImageResource(imgid[0]);
 
         return convertView;
     }
 
     static class ViewHolder {
-        TextView txt_contact;
-        TextView txt_status;
+        TextView txt_chat;
+        TextView txt_body;
+        TextView txt_sentDate;
+        TextView txt_counter;
         ImageView image;
     }
 }
+

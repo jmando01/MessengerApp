@@ -133,7 +133,7 @@ public class ChatListActivity extends FragmentActivity {
                     .setView(lila1)
                             //.setIcon(R.drawable.ic_action_add_person)
                             //.setMessage("Add a new contact")
-                    .setCancelable(false)
+                    .setCancelable(true)
                     .setNeutralButton("Cancel", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
                             dialog.cancel();

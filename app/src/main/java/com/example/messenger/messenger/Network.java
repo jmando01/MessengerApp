@@ -34,8 +34,13 @@ import java.util.TimerTask;
 
 /**
  * Created by Joubert on 09/05/2015.
- * Hay que terminar el metodo de borrar un roster. Esta implementado ahora hay que ver que pasa cuando envian un mensaje...o un cambio de estado
  * Hay que hace un buscador para los contactos.
+ * Enviar mensajes y logica demas...
+ * PONER UN AVISO DE RECONEXION
+ * ERROR raro cuando ya hay una cuenta creada
+ * ERROR cuando se agrega un contacto en blanco
+ * Si vuelvo a agregar el contacto que me borro nos podemos ver otra vez
+ * Hay que probar que pasa si inicio sesion con la misma cuenta en otro dispositivo.
  */
 public class Network extends Application {
 
