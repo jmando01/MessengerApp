@@ -37,10 +37,9 @@ import java.util.TimerTask;
  * Hay que hace un buscador para los contactos.
  * Enviar mensajes y logica demas...
  * PONER UN AVISO DE RECONEXION
- * ERROR raro cuando ya hay una cuenta creada
- * ERROR cuando se agrega un contacto en blanco
  * Si vuelvo a agregar el contacto que me borro nos podemos ver otra vez
- * Hay que probar que pasa si inicio sesion con la misma cuenta en otro dispositivo.
+ * Cuando se borra un contacto este solo se borra por completo de la lista de roster de el que lo borro.
+ * Una vez que se borra un roster cuando se vuelve agregar no aparece en la lista inmediatamente.
  */
 public class Network extends Application {
 
@@ -349,7 +348,7 @@ public class Network extends Application {
         }
     }
 
-    public boolean setPresence(String status){
+    public String setPresence(String status){
         // Create a new presence.
         Presence presence = new Presence(Presence.Type.available);
         presence.setStatus(status);
@@ -357,11 +356,11 @@ public class Network extends Application {
         try {
             connection.sendStanza(presence);
             Log.d("Network", "Changed status to: "+ status);
-            return true;
+            return "success";
         } catch (SmackException.NotConnectedException e) {
             Log.d("Network", "Error changing status");
             e.printStackTrace();
-            return false;
+            return "NotConnectedException";
         }
     }
 

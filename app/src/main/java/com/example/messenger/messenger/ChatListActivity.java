@@ -21,6 +21,9 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 
 public class ChatListActivity extends FragmentActivity {
 
@@ -142,21 +145,30 @@ public class ChatListActivity extends FragmentActivity {
                     .setPositiveButton("Add Contact!", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
                             final String contact;
-
                             contact = addContactEdit.getText().toString();
-                            new Thread(new Runnable() {
-                                public void run() {
-                                    final String notification;
-                                    notification = ((Network) getApplication()).addRoster(contact + Network.SERVICE);
-                                    mHandler.post(new Runnable() {
-                                        public void run() {
-                                            if (!notification.equals("success")) {
-                                                ((Network) getApplication()).showAlertDialog("Notification", notification, ChatListActivity.this);
+
+                            Pattern pattern = Pattern.compile("[^a-z0-9 ]", Pattern.CASE_INSENSITIVE);
+                            Matcher match = pattern.matcher(contact);
+                            boolean contactOK = match.find();
+
+                            if(!contactOK && !contact.contains(" ") && !contact.equals("")){
+                                new Thread(new Runnable() {
+                                    public void run() {
+                                        final String notification;
+                                        notification = ((Network) getApplication()).addRoster(contact + Network.SERVICE);
+                                        mHandler.post(new Runnable() {
+                                            public void run() {
+                                                if (!notification.equals("success")) {
+                                                    ((Network) getApplication()).showAlertDialog("Notification", notification, ChatListActivity.this);
+                                                }
                                             }
-                                        }
-                                    });
-                                }
-                            }).start();
+                                        });
+                                    }
+                                }).start();
+
+                            }else{
+                                ((Network) getApplication()).showAlertDialog("Notification", "This contact has invalid characters", ChatListActivity.this);
+                            }
                         }
                     });
 

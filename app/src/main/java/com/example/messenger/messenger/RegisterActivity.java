@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.os.SystemClock;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -56,6 +57,7 @@ public class RegisterActivity extends Activity {
     private String email;
     private long mLastClickTime;
 
+    private Handler mHandler = new Handler();
     private AbstractXMPPConnection connection;
 
     private String HOST = "192.168.1.4";
@@ -94,7 +96,7 @@ public class RegisterActivity extends Activity {
 
         if(((Network) this.getApplication()).isNetworkConnected()){
             Log.d("RegisterActivity",  "networkOK");
-            if(!usernameOK){
+            if(!usernameOK && !username.contains(" ") && !username.equals("")){
                 Log.d("RegisterActivity",  "usernameOK");
                 if(password.equals(rePassword) && password.length() >= 6){
                     Log.d("RegisterActivity", "PasswordsOK");
@@ -177,8 +179,12 @@ public class RegisterActivity extends Activity {
                     } catch (XMPPException.XMPPErrorException e) {
                         Log.d("RegisterActivity", "XMPPErrorException");
                         //User Already Exists Or Invalid beacause it has a space...
-                        ((Network) getApplication()).showAlertDialog("Invalid Username!", "This username already exist or could contain a space.", RegisterActivity.this);
-                        clearEditText(usernameEdit);
+                        mHandler.post(new Runnable() {
+                            public void run() {
+                                ((Network) getApplication()).showAlertDialog("Invalid Username!", "This username already exist or could contain a space.", RegisterActivity.this);
+                                clearEditText(usernameEdit);
+                            }
+                        });
                         e.printStackTrace();
                     } catch (SmackException.NotConnectedException e) {
                         Log.d("RegisterActivity", "NotConnectedException");

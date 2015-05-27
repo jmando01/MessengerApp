@@ -55,40 +55,39 @@ public class StatusActivity extends Activity {
         });
     }
 
-    class ChangeStatus extends AsyncTask<Void, Void, Boolean> {
+    class ChangeStatus extends AsyncTask<Void, Void, String> {
 
         private ProgressDialog pDialog = new ProgressDialog(StatusActivity.this);
-        private boolean success = false;
+        private String success = "";
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
 
-           // pDialog.setMessage("Changing Status...");
-            //pDialog.setCancelable(false);
-            //pDialog.show();
+            pDialog.setMessage("Updating Status...");
+            pDialog.setCancelable(false);
+            pDialog.show();
         }
 
         @Override
-        protected Boolean doInBackground(Void... args) {
+        protected String doInBackground(Void... args) {
             // TODO Auto-generated method stub
             if(((Network) getApplication()).connection.isConnected()){
                 Log.d("LoginActivity", "connectedOK");
-                success = ((Network) getApplication()).setPresence(status);;
+                return success = ((Network) getApplication()).setPresence(status);
             }else{
                 //No network available
                 Log.d("LoginActivity", "No Network Available");
-                return false;
+                return "No Network Available";
             }
-            return success;
         }
         /**
          * After completing background task Dismiss the progress dialog
          * **/
-        protected void onPostExecute(Boolean success) {
+        protected void onPostExecute(String success) {
             // dismiss the dialog once product deleted
-            // pDialog.dismiss();
-            if(success){
+            pDialog.dismiss();
+            if(!success.equals("success")){
                 currentStatus.setText(status);
                 editor = LoginActivity.sharedPref.edit();
                 editor.putString("status", status);
@@ -97,7 +96,7 @@ public class StatusActivity extends Activity {
                         "Your status has been updated", Toast.LENGTH_LONG)
                         .show();
             }else{
-                ((Network) getApplication()).showAlertDialog("Notification!", "Error changing status. Verify your Internet connection and try again.", StatusActivity.this);
+                ((Network) getApplication()).showAlertDialog("Notification!", success, StatusActivity.this);
             }
         }
     }
