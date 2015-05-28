@@ -243,15 +243,15 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         // looping through all rows and adding to list
         if (cursor.moveToFirst()) {
             do {
-                Chat chatContact = new Chat();
-                chatContact.setID(Integer.parseInt(cursor.getString(0)));
-                chatContact.setUser(cursor.getString(1));
-                chatContact.setChat(cursor.getString(2));
-                chatContact.setBody(cursor.getString(3));
-                chatContact.setSentDate(cursor.getString(4));
-                chatContact.setCounter(cursor.getString(5));
+                Chat chat = new Chat();
+                chat.setID(Integer.parseInt(cursor.getString(0)));
+                chat.setUser(cursor.getString(1));
+                chat.setChat(cursor.getString(2));
+                chat.setBody(cursor.getString(3));
+                chat.setSentDate(cursor.getString(4));
+                chat.setCounter(cursor.getString(5));
                 // Adding contact to list
-                chatList.add(chatContact);
+                chatList.add(chat);
             } while (cursor.moveToNext());
         }
         cursor.close();
@@ -307,7 +307,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public void deleteMessage(MessageArchive message) {
         SQLiteDatabase db = this.getWritableDatabase();
         db.delete(MESSAGE_ARCHIVE_TABLE, KEY_ID + " = ?",
-                new String[] { String.valueOf(message.getID()) });
+                new String[]{String.valueOf(message.getID())});
         db.close();
     }
 
@@ -364,5 +364,19 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         count = cursor.getCount();
         db.close();
         return count;
+    }
+
+    // Getting contacts Count
+    public int getContactID(String contact) {
+        String selectQuery = "SELECT *  FROM " + CONTACTS_TABLE + " WHERE user = '" + LoginActivity.sharedPref.getString("username", "default") + "' AND contact = '" + contact + "'";
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+        int ID = 0;
+        if (cursor.moveToFirst()) {
+            ID = Integer.parseInt(cursor.getString(0));
+        }
+        cursor.close();
+        db.close();
+        return ID;
     }
 }

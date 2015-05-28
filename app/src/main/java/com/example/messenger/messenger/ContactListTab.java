@@ -21,9 +21,10 @@ import java.util.List;
 
 public class ContactListTab extends Fragment {
 
-	private ArrayList<Contact> tempContacts;
+
 	private ArrayList<Chat> tempChats;
 	private Handler mHandler = new Handler();
+	private static ArrayList<Contact> tempContacts;
 	public static ContactListBaseAdapter adapter = null;
 	public static ArrayList<Contact> contacts;
 	public static ArrayList<Chat> chats;
@@ -35,21 +36,9 @@ public class ContactListTab extends Fragment {
 
 		 View contactListTab = inflater.inflate(R.layout.contact_list_frag, container, false);
 
-		 tempContacts = new ArrayList<Contact>();
-		 contacts = new ArrayList<Contact>();
+		 context = getActivity().getApplicationContext();
 
-		 context = getActivity().getApplication();
-
-		 DatabaseHandler db = new DatabaseHandler(context);
-		 tempContacts = (ArrayList<Contact>) db.getAllContacts();
-		 db.close();
-
-		 for(int i = 0; i < tempContacts.size(); i ++){
-			 if(tempContacts.get(i).getUser().equals(LoginActivity.sharedPref.getString("username", "default"))){
-				 Log.d("ContactTabList", "Contact List: " + tempContacts.get(i).getContact());
-				contacts.add(tempContacts.get(i));
-			 }
-		 }
+		 refreshContactList();
 
 		 final ListView lv1 = (ListView) contactListTab.findViewById(R.id.contactListLv);
 		 adapter = new ContactListBaseAdapter(getActivity(), contacts);
@@ -146,6 +135,7 @@ public class ContactListTab extends Fragment {
 	 }
 
 	public static void setPresenceChanged(String contact, String status){
+
 		Log.d("ContactTabList", "Presence Changed Contact: " + contact + " Status: " + status);
 		for(int i = 0; i < contacts.size(); i++){
 			if(contact.equals(contacts.get(i).getContact())){
@@ -160,22 +150,38 @@ public class ContactListTab extends Fragment {
 	//aun no se implementa
 	public static void setContactListChanged(String contact){
 		Log.d("ContactTabList", "Contact List Changed: " + contact);
-			contacts.add(new Contact(LoginActivity.sharedPref.getString("username", "default"), contact, " "));
-			adapter.notifyDataSetChanged();
+		contacts.add(new Contact(LoginActivity.sharedPref.getString("username", "default"), contact, " "));
+		adapter.notifyDataSetChanged();
 	}
 
 	public void setRemoveContactFromContactList(String contact){
+
 		for(int i = 0; i < contacts.size(); i++){
 			if(contact.equals(contacts.get(i).getContact())){
 
 				DatabaseHandler db = new DatabaseHandler(context);
 				//para borrar un usuario solo es necesario el ID
-				db.deleteContact(new Contact(contacts.get(i).getID(), "", "", ""));
+				db.deleteContact(new Contact(db.getContactID(contact), "", "", ""));
 				db.close();
 
 				contacts.remove(i);
 				adapter.notifyDataSetChanged();
-				Log.d("Network", "User: " + contact + " has been removed2.");
+				Log.d("Network", "User: " + contact + " has been removed from contact list");
+			}
+		}
+	}
+
+	public static void refreshContactList(){
+		tempContacts = new ArrayList<Contact>();
+		contacts = new ArrayList<Contact>();
+
+		DatabaseHandler db = new DatabaseHandler(context);
+		tempContacts = (ArrayList<Contact>) db.getAllContacts();
+		db.close();
+
+		for(int i = 0; i < tempContacts.size(); i ++){
+			if(tempContacts.get(i).getUser().equals(LoginActivity.sharedPref.getString("username", "default"))){
+				contacts.add(tempContacts.get(i));
 			}
 		}
 	}

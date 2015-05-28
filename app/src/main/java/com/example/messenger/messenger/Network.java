@@ -39,7 +39,6 @@ import java.util.TimerTask;
  * PONER UN AVISO DE RECONEXION
  * Si vuelvo a agregar el contacto que me borro nos podemos ver otra vez
  * Cuando se borra un contacto este solo se borra por completo de la lista de roster de el que lo borro.
- * Una vez que se borra un roster cuando se vuelve agregar no aparece en la lista inmediatamente.
  */
 public class Network extends Application {
 
@@ -327,7 +326,7 @@ public class Network extends Application {
     public String removeRoster(String contact){
         try {
             roster.removeEntry(roster.getEntry(contact));
-            Log.d("Network", "User: "+contact+" has been removed1.");
+            Log.d("Network", "User: "+contact+" has been removed from roster");
             return "success";
         } catch (SmackException.NotLoggedInException e) {
             Log.d("Network", "NotLoggedInException");
