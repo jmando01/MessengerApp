@@ -34,11 +34,13 @@ import java.util.TimerTask;
 
 /**
  * Created by Joubert on 09/05/2015.
- * Hay que hace un buscador para los contactos.
  * Enviar mensajes y logica demas...
- * PONER UN AVISO DE RECONEXION
- * Si vuelvo a agregar el contacto que me borro nos podemos ver otra vez
+ *
+ * Hacer un buscador para los contactos.
+ * PONER UN AVISO DE RECONEXION.
+ * Si vuelvo a agregar el contacto que me borro nos podemos ver otra vez.
  * Cuando se borra un contacto este solo se borra por completo de la lista de roster de el que lo borro.
+ * La pantalla inicial cuando se tiene el autologin no deberia de aparecer.
  */
 public class Network extends Application {
 
@@ -54,7 +56,6 @@ public class Network extends Application {
     private Timer timer;
     private Roster roster;
     private Handler mHandler = new Handler();
-    private ArrayList<Contact> temp;
     private ArrayList<Contact> contacts;
 
     public static String SERVICE = "@localhost";
@@ -267,18 +268,11 @@ public class Network extends Application {
         try {
             roster.createEntry(contact, contact, null);
 
-            temp = new ArrayList<Contact>();
             contacts = new ArrayList<Contact>();
 
             DatabaseHandler dbb = new DatabaseHandler(getApplicationContext());
-            temp = (ArrayList<Contact>) dbb.getAllContacts();
+            contacts = (ArrayList<Contact>) dbb.getAllContacts();
             dbb.close();
-
-            for(int i = 0; i < temp.size(); i ++){
-                if(temp.get(i).getUser().equals(LoginActivity.sharedPref.getString("username", "default"))){
-                    contacts.add(temp.get(i));
-                }
-            }
 
             boolean found = false;
 
@@ -290,7 +284,7 @@ public class Network extends Application {
 
             if(!found){
                 DatabaseHandler db = new DatabaseHandler(getApplicationContext());
-                db.addContact(new Contact(LoginActivity.sharedPref.getString("username", "default"), contact, " "));
+                db.addContact(new Contact(LoginActivity.sharedPref.getString("username", "default"), contact, "<Pending>"));
                 db.close();
 
                 mHandler.post(new Runnable() {

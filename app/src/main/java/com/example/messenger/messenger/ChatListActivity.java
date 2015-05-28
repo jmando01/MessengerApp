@@ -32,11 +32,14 @@ public class ChatListActivity extends FragmentActivity {
     private ActionBar actionBar;
     private SharedPreferences.Editor editor;
     private Handler mHandler = new Handler();
+    public static boolean isRunning;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat_list);
+
+        isRunning = true;
 
         TabAdapter = new TabPagerAdapter(getSupportFragmentManager());
 
@@ -179,6 +182,13 @@ public class ChatListActivity extends FragmentActivity {
                     "Please wait for reconnection", Toast.LENGTH_LONG)
                     .show();
         }
+    }
+
+    @Override
+    protected void onPause(){
+        super.onPause();
+        isRunning = false;
+        Log.d("ChatListActivity","onPause");
     }
 
     @Override

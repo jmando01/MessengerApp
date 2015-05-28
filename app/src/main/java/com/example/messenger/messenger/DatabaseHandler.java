@@ -182,7 +182,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public List<MessageArchive> getAllMessages() {
         List<MessageArchive> messageList = new ArrayList<MessageArchive>();
         // Select All Query
-        String selectQuery = "SELECT  * FROM " + MESSAGE_ARCHIVE_TABLE;
+        String selectQuery = "SELECT * FROM " + MESSAGE_ARCHIVE_TABLE + " WHERE user = '"+ LoginActivity.sharedPref.getString("username", "default") +"'";
 
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
@@ -211,7 +211,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public List<Contact> getAllContacts() {
         List<Contact> contactList = new ArrayList<Contact>();
         // Select All Query
-        String selectQuery = "SELECT  * FROM " + CONTACTS_TABLE;
+        String selectQuery = "SELECT * FROM " + CONTACTS_TABLE + " WHERE user = '"+ LoginActivity.sharedPref.getString("username", "default") +"'";
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
         // looping through all rows and adding to list
@@ -237,7 +237,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public List<Chat> getAllChats() {
         List<Chat> chatList = new ArrayList<Chat>();
         // Select All Query
-        String selectQuery = "SELECT  * FROM " + CHATS_TABLE;
+        String selectQuery = "SELECT * FROM " + CHATS_TABLE + " WHERE user = '"+ LoginActivity.sharedPref.getString("username", "default") +"'";
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
         // looping through all rows and adding to list

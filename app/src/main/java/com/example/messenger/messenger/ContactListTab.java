@@ -24,7 +24,6 @@ public class ContactListTab extends Fragment {
 
 	private ArrayList<Chat> tempChats;
 	private Handler mHandler = new Handler();
-	private static ArrayList<Contact> tempContacts;
 	public static ContactListBaseAdapter adapter = null;
 	public static ArrayList<Contact> contacts;
 	public static ArrayList<Chat> chats;
@@ -172,18 +171,11 @@ public class ContactListTab extends Fragment {
 	}
 
 	public static void refreshContactList(){
-		tempContacts = new ArrayList<Contact>();
 		contacts = new ArrayList<Contact>();
 
 		DatabaseHandler db = new DatabaseHandler(context);
-		tempContacts = (ArrayList<Contact>) db.getAllContacts();
+		contacts = (ArrayList<Contact>) db.getAllContacts();
 		db.close();
-
-		for(int i = 0; i < tempContacts.size(); i ++){
-			if(tempContacts.get(i).getUser().equals(LoginActivity.sharedPref.getString("username", "default"))){
-				contacts.add(tempContacts.get(i));
-			}
-		}
 	}
 }
 
