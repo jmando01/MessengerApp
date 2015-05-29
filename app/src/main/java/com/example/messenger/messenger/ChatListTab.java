@@ -3,6 +3,7 @@ package com.example.messenger.messenger;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
@@ -21,7 +22,6 @@ import java.util.List;
 
 public class ChatListTab extends Fragment {
 
-	private ArrayList<Chat> temp;
 	private Handler mHandler = new Handler();
 	public static ChatListBaseAdapter adapter = null;
 	public static ArrayList<Chat> chats;
@@ -31,23 +31,11 @@ public class ChatListTab extends Fragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 							 Bundle savedInstanceState) {
 
-		View chatListTab = inflater.inflate(R.layout.chat_list_frag, container, false);
+				View chatListTab = inflater.inflate(R.layout.chat_list_frag, container, false);
 
-		temp = new ArrayList<Chat>();
-		chats = new ArrayList<Chat>();
+		context = getActivity().getApplicationContext();
 
-		context = getActivity().getApplication();
-
-		DatabaseHandler db = new DatabaseHandler(context);
-		temp = (ArrayList<Chat>) db.getAllChats();
-		db.close();
-
-		for(int i = 0; i < temp.size(); i ++){
-			if(temp.get(i).getUser().equals(LoginActivity.sharedPref.getString("username", "default"))){
-				Log.d("ChatTabList", "Chat List: " + temp.get(i).getChat());
-				chats.add(temp.get(i));
-			}
-		}
+		refreshChatList();
 
 		final ListView lv1 = (ListView) chatListTab.findViewById(R.id.chatListLv);
 		adapter = new ChatListBaseAdapter(getActivity(), chats);
@@ -58,6 +46,9 @@ public class ChatListTab extends Fragment {
 			public void onItemClick(AdapterView<?> a, View v, int position, long id) {
 
 				Chat chat = chats.get(position);
+				Intent intent = new Intent(getActivity(), ChatActivity.class);
+				intent.putExtra("contact",chat.getChat());
+				startActivity(intent);
 
 			}
 		});
@@ -66,7 +57,7 @@ public class ChatListTab extends Fragment {
 			@Override
 			public boolean onItemLongClick(AdapterView<?> parent, final View view, int position, long id) {
 
-				Chat chat = chats.get(position);
+				final Chat chat = chats.get(position);
 
 				CharSequence[] items = {"Send a Message", "Delete Chat"};
 
@@ -75,10 +66,12 @@ public class ChatListTab extends Fragment {
 				builder.setItems(items, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int item) {
 						if (item == 0) {
-							//Aqui debe ir el codigo para enviar un mensaje al contacto.
+							Intent intent = new Intent(getActivity(), ChatActivity.class);
+							intent.putExtra("contact",chat.getChat());
+							startActivity(intent);
 						}
 						if (item == 1) {
-							//Aqui va el codigo para eliminar un chat
+							setRemoveChatFromChatList(chat.getChat());
 						}
 					}
 				});
@@ -89,5 +82,68 @@ public class ChatListTab extends Fragment {
 		});
 
 		return chatListTab;
+	}
+
+	public static void setChatListChanged(String chat, String body, String date, String counter) {
+		Log.d("ChatTabList", "Chat List Changed: " + chat);
+		chats.add(0, new Chat(LoginActivity.sharedPref.getString("username", "default"), chat, body, date, counter));
+		adapter.notifyDataSetChanged();
+	}
+
+	public static void setChatUpdate(String chat, String body, String date, String counter){
+
+		Log.d("ChatTabList", "Udated Chat: " + chat + " body: " + body);
+		for(int i = 0; i < chats.size(); i++){
+			if(chat.equals(chats.get(i).getChat())){
+				chats.get(i).setUser(LoginActivity.sharedPref.getString("username", "default"));
+				chats.get(i).setChat(chat);
+				chats.get(i).setBody(body);
+				chats.get(i).setSentDate(date);
+				chats.get(i).setCounter(counter);
+
+				chats.set(0, chats.get(i));
+
+				DatabaseHandler db = new DatabaseHandler(context);
+				db.updateChat(new Chat(db.getChatID(chat), LoginActivity.sharedPref.getString("username", "default"), chat, body, date, counter));
+				db.close();
+			}
+		}
+		adapter.notifyDataSetChanged();
+	}
+
+	public void setRemoveChatFromChatList(String chat){
+
+		for(int i = 0; i < chats.size(); i++){
+			if(chat.equals(chats.get(i).getChat())){
+
+				DatabaseHandler db = new DatabaseHandler(context);
+				//para borrar un usuario solo es necesario el ID
+				db.deleteChat(new Chat(db.getChatID(chat), "", "", "", "", ""));
+				db.close();
+
+				chats.remove(i);
+				adapter.notifyDataSetChanged();
+				Log.d("ChatListTab", "Chat: " + chat + " has been removed from chat list");
+			}
+		}
+	}
+
+	public static void deleteFromChatList(String contact){
+		ArrayList<Chat> tempList = new ArrayList<Chat>();
+		for(int i = 0;i<chats.size(); i ++){
+			if(!chats.get(i).getChat().equals(contact)){
+				tempList.add(chats.get(i));
+			}
+		}
+		chats.clear();
+		chats = tempList;
+	}
+
+	public static void refreshChatList(){
+		chats = new ArrayList<Chat>();
+
+		DatabaseHandler db = new DatabaseHandler(context);
+		chats = (ArrayList<Chat>) db.getAllChats();
+		db.close();
 	}
 }

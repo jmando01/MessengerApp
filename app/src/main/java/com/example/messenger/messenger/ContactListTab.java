@@ -21,12 +21,9 @@ import java.util.List;
 
 public class ContactListTab extends Fragment {
 
-
-	private ArrayList<Chat> tempChats;
 	private Handler mHandler = new Handler();
 	public static ContactListBaseAdapter adapter = null;
 	public static ArrayList<Contact> contacts;
-	public static ArrayList<Chat> chats;
 	public static Context context;
 
 	 @Override
@@ -47,35 +44,13 @@ public class ContactListTab extends Fragment {
 			 @Override
 			 public void onItemClick(AdapterView<?> a, View v, int position, long id) {
 
-				 Contact contact = contacts.get(position);
+				 final Contact contact = contacts.get(position);
 
-				 /*tempChats = new ArrayList<Chat>();
-				 chats = new ArrayList<Chat>();
-
-				 DatabaseHandler db = new DatabaseHandler(context);
-				 tempChats = (ArrayList<Chat>) db.getAllChats();
-				 db.close();
-
-				 for(int i = 0; i < tempChats.size(); i ++){
-					 if(tempChats.get(i).getUser().equals(LoginActivity.sharedPref.getString("username", "default"))){
-						 Log.d("ChatTabList", "Chat List: " + tempChats.get(i).getChat());
-						 chats.add(tempChats.get(i));
+				 new Thread(new Runnable() {
+					 public void run() {
+						 ((Network) getActivity().getApplicationContext()).sendMessage(contact.getContact(), "olis amiguis");
 					 }
-				 }
-
-				 boolean found = false;
-
-				 for(int i = 0; i < tempChats.size(); i ++){
-					 if(tempChats.get(i).getChat().equals(contact.getContact())){
-						 found = true;
-					 }
-				 }
-
-				 if(!found){
-					 DatabaseHandler dbb = new DatabaseHandler(context);
-					 dbb.addChat(new Chat(contact.getUser(), contact.getContact(), " ", " ", " "));
-					 dbb.close();
-				 }*/
+				 }).start();
 			 }
 		 });
 
@@ -92,7 +67,9 @@ public class ContactListTab extends Fragment {
 				 builder.setItems(items, new DialogInterface.OnClickListener() {
 					 public void onClick(DialogInterface dialog, int item) {
 						 if (item == 0) {
-							 //Aqui debe ir el codigo para enviar un mensaje al contacto.
+							 Intent intent = new Intent(getActivity(), ChatActivity.class);
+							 intent.putExtra("contact",contact.getContact());
+							 startActivity(intent);
 						 }
 						 if (item == 1) {
 
@@ -133,20 +110,20 @@ public class ContactListTab extends Fragment {
 		 return contactListTab;
 	 }
 
-	public static void setPresenceChanged(String contact, String status){
+	public static void setPresenceUpdate(String contact, String status){
 
 		Log.d("ContactTabList", "Presence Changed Contact: " + contact + " Status: " + status);
 		for(int i = 0; i < contacts.size(); i++){
 			if(contact.equals(contacts.get(i).getContact())){
 				contacts.get(i).setStatus(status);
 				DatabaseHandler db = new DatabaseHandler(context);
-				db.updateContact(new Contact(contacts.get(i).getID(), contacts.get(i).getUser(), contacts.get(i).getContact(), status));
+				db.updateContact(new Contact(db.getContactID(contact), contacts.get(i).getUser(), contacts.get(i).getContact(), status));
 				db.close();
 			}
 		}
 		adapter.notifyDataSetChanged();
 	}
-	//aun no se implementa
+
 	public static void setContactListChanged(String contact){
 		Log.d("ContactTabList", "Contact List Changed: " + contact);
 		contacts.add(new Contact(LoginActivity.sharedPref.getString("username", "default"), contact, " "));
@@ -165,7 +142,7 @@ public class ContactListTab extends Fragment {
 
 				contacts.remove(i);
 				adapter.notifyDataSetChanged();
-				Log.d("Network", "User: " + contact + " has been removed from contact list");
+				Log.d("ContactListTab", "User: " + contact + " has been removed from contact list");
 			}
 		}
 	}

@@ -366,9 +366,23 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return count;
     }
 
-    // Getting contacts Count
+    // Getting contact ID
     public int getContactID(String contact) {
         String selectQuery = "SELECT *  FROM " + CONTACTS_TABLE + " WHERE user = '" + LoginActivity.sharedPref.getString("username", "default") + "' AND contact = '" + contact + "'";
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+        int ID = 0;
+        if (cursor.moveToFirst()) {
+            ID = Integer.parseInt(cursor.getString(0));
+        }
+        cursor.close();
+        db.close();
+        return ID;
+    }
+
+    // Getting chat ID
+    public int getChatID(String chat) {
+        String selectQuery = "SELECT *  FROM " + CHATS_TABLE + " WHERE user = '" + LoginActivity.sharedPref.getString("username", "default") + "' AND chat = '" + chat + "'";
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
         int ID = 0;

@@ -15,10 +15,17 @@ import android.util.Log;
 import org.jivesoftware.smack.AbstractXMPPConnection;
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.ConnectionListener;
+import org.jivesoftware.smack.MessageListener;
 import org.jivesoftware.smack.ReconnectionManager;
 import org.jivesoftware.smack.SmackException;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smack.chat.Chat;
+import org.jivesoftware.smack.chat.ChatManager;
+import org.jivesoftware.smack.chat.ChatManagerListener;
+import org.jivesoftware.smack.chat.ChatMessageListener;
+import org.jivesoftware.smack.packet.DefaultExtensionElement;
+import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.roster.Roster;
 import org.jivesoftware.smack.roster.RosterListener;
@@ -35,6 +42,8 @@ import java.util.TimerTask;
 /**
  * Created by Joubert on 09/05/2015.
  * Enviar mensajes y logica demas...
+ * hay que probar con tres contactos a ver si funciona bien.
+ * Hay que terminar la parte de la horas y el contador.
  *
  * Hacer un buscador para los contactos.
  * PONER UN AVISO DE RECONEXION.
@@ -57,6 +66,7 @@ public class Network extends Application {
     private Roster roster;
     private Handler mHandler = new Handler();
     private ArrayList<Contact> contacts;
+    private ArrayList<com.example.messenger.messenger.Chat> chats;
 
     public static String SERVICE = "@localhost";
 
@@ -115,6 +125,7 @@ public class Network extends Application {
                     roster = Roster.getInstanceFor(connection);
                     Log.d("Connect", "Roster subscription mode set to: " + roster.getSubscriptionMode());
                     setRosterListener();
+                    setChatMessageListener();
 
                     if(!autoLogin){
                         Intent intent = new Intent(getApplicationContext(), ChatListActivity.class);
@@ -239,7 +250,7 @@ public class Network extends Application {
 
                 String from = presence.getFrom().toString();
 
-                if(from.contains("/")){
+                if (from.contains("/")) {
                     from = presence.getFrom().substring(0, presence.getFrom().indexOf('/'));
                 }
 
@@ -248,12 +259,12 @@ public class Network extends Application {
                 mHandler.post(new Runnable() {
                     public void run() {
                         try {
-                            if(presence.getStatus() != null){
-                                ContactListTab.setPresenceChanged(finalFrom, presence.getStatus());
-                            }else{
-                                ContactListTab.setPresenceChanged(finalFrom, "Offline");
+                            if (presence.getStatus() != null) {
+                                ContactListTab.setPresenceUpdate(finalFrom, presence.getStatus());
+                            } else {
+                                ContactListTab.setPresenceUpdate(finalFrom, "Offline");
                             }
-                        }catch(Exception e){
+                        } catch (Exception e) {
                             Log.d("Network", "Presence Changed  ERROR");
                             e.getStackTrace();
                         }
@@ -348,7 +359,7 @@ public class Network extends Application {
         // Send the packet.
         try {
             connection.sendStanza(presence);
-            Log.d("Network", "Changed status to: "+ status);
+            Log.d("Network", "Changed status to: " + status);
             return "success";
         } catch (SmackException.NotConnectedException e) {
             Log.d("Network", "Error changing status");
@@ -356,6 +367,112 @@ public class Network extends Application {
             return "NotConnectedException";
         }
     }
+
+    public void sendMessage(final String contact, final String message){
+
+        Message msg = new Message(contact, Message.Type.chat);
+        msg.setFrom(LoginActivity.sharedPref.getString("username", "default"));
+        msg.setBody(message);
+        try {
+            connection.sendStanza(msg);
+            chats = new ArrayList<com.example.messenger.messenger.Chat>();
+
+            DatabaseHandler db = new DatabaseHandler(getApplicationContext());
+            chats = (ArrayList<com.example.messenger.messenger.Chat>) db.getAllChats();
+            db.close();
+
+            boolean found = false;
+
+            for(int i = 0; i < chats.size(); i ++){
+                if(chats.get(i).getChat().equals(contact)){
+                    found = true;
+                }
+            }
+
+            if(!found){
+                DatabaseHandler dbb = new DatabaseHandler(getApplicationContext());
+                dbb.addChat(new com.example.messenger.messenger.Chat(LoginActivity.sharedPref.getString("username", "default"), contact, message, "now", "1"));
+                dbb.close();
+
+                mHandler.post(new Runnable() {
+                    public void run() {
+                        ChatListTab.setChatListChanged(contact, message, "now", "1");
+                    }
+                });
+
+            }else{
+                mHandler.post(new Runnable() {
+                    public void run() {
+                        ChatListTab.setChatUpdate(contact, message, "now", "1");
+                    }
+                });
+            }
+        } catch (SmackException.NotConnectedException e) {
+            Log.d("Network", "Error sending message");
+            e.printStackTrace();
+        }
+    }
+
+    public void setChatMessageListener(){
+        ChatManager.getInstanceFor(connection).addChatListener(new ChatManagerListener() {
+            @Override
+            public void chatCreated(Chat chat, boolean createdLocally) {
+                chat.addMessageListener(new ChatMessageListener() {
+                    @Override
+                    public void processMessage(Chat chat, final Message message) {
+                        if (message.getType() == Message.Type.chat || message.getType() == Message.Type.normal) {
+                            if(message.getBody()!=null) {
+                                Log.d("Network", message.getFrom().substring(0, message.getFrom().indexOf("/")) + " : " + message.getBody());
+
+                                final String contact = message.getFrom().substring(0, message.getFrom().indexOf("/"));
+
+                                chats = new ArrayList<com.example.messenger.messenger.Chat>();
+
+                                DatabaseHandler db = new DatabaseHandler(getApplicationContext());
+                                chats = (ArrayList<com.example.messenger.messenger.Chat>) db.getAllChats();
+                                db.close();
+
+                                boolean found = false;
+
+                                for(int i = 0; i < chats.size(); i ++){
+                                    if(chats.get(i).getChat().equals(message.getFrom().substring(0, message.getFrom().indexOf("/")))){
+                                        found = true;
+                                    }
+                                }
+
+                                if(!found){
+                                    DatabaseHandler dbb = new DatabaseHandler(getApplicationContext());
+                                    dbb.addChat(new com.example.messenger.messenger.Chat(LoginActivity.sharedPref.getString("username", "default"), contact, message.getBody(), "now", "1"));
+                                    dbb.close();
+
+                                    mHandler.post(new Runnable() {
+                                        public void run() {
+                                            ChatListTab.setChatListChanged(contact, message.getBody(), "now", "1");
+                                        }
+                                    });
+                                }else{
+                                    mHandler.post(new Runnable() {
+                                        public void run() {
+                                            ChatListTab.setChatUpdate(contact, message.getBody(), "now", "1");
+                                        }
+                                    });
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        });
+
+        /* if(message.getType() == Message.Type.chat) {
+      //single chat message
+   } else if(message.getType() == Message.Type.groupchat) {
+      //group chat message
+   } else if(message.getType() == Message.Type.error) {
+      //error message
+   }*/
+    }
+
 
     public void disconect(){
         new Thread(new Runnable() {
