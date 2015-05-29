@@ -88,6 +88,7 @@ public class ContactListTab extends Fragment {
 													 ((Network) getActivity().getApplicationContext()).showAlertDialog("Notification!", notification, getActivity().getApplicationContext());
 												 }else{
 													 setRemoveContactFromContactList(contact.getContact());
+													 ChatListTab.setRemoveChatFromChatList(contact.getContact());
 												 }
 											 }
 										 });

@@ -42,8 +42,8 @@ import java.util.TimerTask;
 /**
  * Created by Joubert on 09/05/2015.
  * Enviar mensajes y logica demas...
- * hay que probar con tres contactos a ver si funciona bien.
  * Hay que terminar la parte de la horas y el contador.
+ * Creo que ocurrio un error cuando se agregan contactos con diferentes cuentas en el mismo dispositivo.
  *
  * Hacer un buscador para los contactos.
  * PONER UN AVISO DE RECONEXION.

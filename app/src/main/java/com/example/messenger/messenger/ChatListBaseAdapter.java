@@ -29,12 +29,12 @@ public class ChatListBaseAdapter  extends BaseAdapter {
         l_Inflater = LayoutInflater.from(context);
     }
 
-    public void removeContact(Chat chat){
+    public void removeChat(Chat chat){
         chatArrayList.remove(chat);
         notifyDataSetChanged();
     }
 
-    public void addContact(Chat chat) {
+    public void addChat(Chat chat) {
         chatArrayList.add(chat);
         notifyDataSetChanged();
     }

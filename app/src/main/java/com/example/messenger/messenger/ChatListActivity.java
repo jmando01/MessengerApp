@@ -186,9 +186,10 @@ public class ChatListActivity extends FragmentActivity {
 
     @Override
     protected void onPause(){
-        super.onPause();
         isRunning = false;
-        Log.d("ChatListActivity","onPause");
+        ChatListTab.reloadChatList();
+        Log.d("ChatListActivity", "onPause");
+        super.onPause();
     }
 
     @Override

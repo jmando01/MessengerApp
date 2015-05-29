@@ -95,13 +95,17 @@ public class ChatListTab extends Fragment {
 		Log.d("ChatTabList", "Udated Chat: " + chat + " body: " + body);
 		for(int i = 0; i < chats.size(); i++){
 			if(chat.equals(chats.get(i).getChat())){
-				chats.get(i).setUser(LoginActivity.sharedPref.getString("username", "default"));
-				chats.get(i).setChat(chat);
-				chats.get(i).setBody(body);
-				chats.get(i).setSentDate(date);
-				chats.get(i).setCounter(counter);
 
-				chats.set(0, chats.get(i));
+				Chat updateChat = new Chat();
+
+				updateChat.setUser(LoginActivity.sharedPref.getString("username", "default"));
+				updateChat.setChat(chat);
+				updateChat.setBody(body);
+				updateChat.setSentDate(date);
+				updateChat.setCounter(counter);
+
+				chats.remove(i);
+				chats.add(0, updateChat);
 
 				DatabaseHandler db = new DatabaseHandler(context);
 				db.updateChat(new Chat(db.getChatID(chat), LoginActivity.sharedPref.getString("username", "default"), chat, body, date, counter));
@@ -111,7 +115,7 @@ public class ChatListTab extends Fragment {
 		adapter.notifyDataSetChanged();
 	}
 
-	public void setRemoveChatFromChatList(String chat){
+	public static void setRemoveChatFromChatList(String chat){
 
 		for(int i = 0; i < chats.size(); i++){
 			if(chat.equals(chats.get(i).getChat())){
@@ -128,15 +132,18 @@ public class ChatListTab extends Fragment {
 		}
 	}
 
-	public static void deleteFromChatList(String contact){
-		ArrayList<Chat> tempList = new ArrayList<Chat>();
-		for(int i = 0;i<chats.size(); i ++){
-			if(!chats.get(i).getChat().equals(contact)){
-				tempList.add(chats.get(i));
+	public static void reloadChatList(){
+		DatabaseHandler db = new DatabaseHandler(context);
+		List<Chat> reloadChats = db.getAllChats();
+		for (Chat cn : reloadChats) {
+			if(cn.getUser().equals(LoginActivity.sharedPref.getString("username", "default"))){
+				db.deleteChat(new Chat(cn.getID(), "", "", "", "", ""));
 			}
 		}
-		chats.clear();
-		chats = tempList;
+		for (int i = 0; i<chats.size(); i++){
+			db.addChat(new Chat(LoginActivity.sharedPref.getString("username", "default"), chats.get(i).getChat(), chats.get(i).getBody(), chats.get(i).getSentDate(), chats.get(i).getCounter()));
+		}
+		db.close();
 	}
 
 	public static void refreshChatList(){
