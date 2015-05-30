@@ -11,7 +11,7 @@ public class Chat {
     private String _chat;
     private String _body;
     private String _sentDate;
-    private String _counter;
+    private int _counter;
 
     // Empty constructor
     public Chat(){
@@ -19,7 +19,7 @@ public class Chat {
     }
 
     // constructor
-    public Chat(int id, String user, String chat, String body, String sentDate, String counter){
+    public Chat(int id, String user, String chat, String body, String sentDate, int counter){
         this._id = id;
         this._user = user;
         this._chat = chat;
@@ -29,7 +29,7 @@ public class Chat {
     }
 
     // constructor
-    public Chat(String user, String chat, String body, String sentDate, String counter){
+    public Chat(String user, String chat, String body, String sentDate, int counter){
         this._user = user;
         this._chat = chat;
         this._body = body;
@@ -67,10 +67,10 @@ public class Chat {
     public void setSentDate(String sentDate) {
         this._sentDate = sentDate;
     }
-    public String getCounter(){
+    public int getCounter(){
         return _counter;
     }
-    public void setCounter(String counter){
+    public void setCounter(int counter){
         this._counter = counter;
     }
 }

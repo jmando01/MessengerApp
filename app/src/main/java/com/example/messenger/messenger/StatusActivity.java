@@ -87,7 +87,7 @@ public class StatusActivity extends Activity {
         protected void onPostExecute(String success) {
             // dismiss the dialog once product deleted
             pDialog.dismiss();
-            if(!success.equals("success")){
+            if(success.equals("success")){
                 currentStatus.setText(status);
                 editor = LoginActivity.sharedPref.edit();
                 editor.putString("status", status);

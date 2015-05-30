@@ -10,10 +10,21 @@ import android.view.MenuItem;
 
 public class ChatActivity extends Activity {
 
+    public static boolean isRunning;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
+
+        isRunning = true;
+    }
+
+    @Override
+    protected void onPause(){
+        super.onPause();
+        Log.d("ChatActivity","onPause");
+        isRunning = false;
     }
 
     @Override

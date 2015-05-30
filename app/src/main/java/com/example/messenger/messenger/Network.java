@@ -42,7 +42,7 @@ import java.util.TimerTask;
 /**
  * Created by Joubert on 09/05/2015.
  * Enviar mensajes y logica demas...
- * Hay que terminar la parte de la horas y el contador.
+ * *Hay que terminar la parte de la horas.
  * Creo que ocurrio un error cuando se agregan contactos con diferentes cuentas en el mismo dispositivo.
  *
  * Hacer un buscador para los contactos.
@@ -246,7 +246,7 @@ public class Network extends Application {
 
             @Override
             public void presenceChanged(final Presence presence) {
-                Log.d("Network", "Presence Changed User: " + presence.getFrom() + " Status: " + presence.getStatus());
+                Log.d("Network", "Presence Changed User: " + presence.getFrom() + " Status: " + presence.getStatus() + "Presence Type: " + presence.getType().toString());
 
                 String from = presence.getFrom().toString();
 
@@ -259,9 +259,10 @@ public class Network extends Application {
                 mHandler.post(new Runnable() {
                     public void run() {
                         try {
-                            if (presence.getStatus() != null) {
+                            if (presence.isAvailable()) {
                                 ContactListTab.setPresenceUpdate(finalFrom, presence.getStatus());
-                            } else {
+                            }
+                            if (presence.getType() == Presence.Type.unavailable) {
                                 ContactListTab.setPresenceUpdate(finalFrom, "Offline");
                             }
                         } catch (Exception e) {
@@ -391,19 +392,19 @@ public class Network extends Application {
 
             if(!found){
                 DatabaseHandler dbb = new DatabaseHandler(getApplicationContext());
-                dbb.addChat(new com.example.messenger.messenger.Chat(LoginActivity.sharedPref.getString("username", "default"), contact, message, "now", "1"));
+                dbb.addChat(new com.example.messenger.messenger.Chat(LoginActivity.sharedPref.getString("username", "default"), contact, message, "now", 0));
                 dbb.close();
 
                 mHandler.post(new Runnable() {
                     public void run() {
-                        ChatListTab.setChatListChanged(contact, message, "now", "1");
+                        ChatListTab.setChatListChanged(contact, message, "now", 0);
                     }
                 });
 
             }else{
                 mHandler.post(new Runnable() {
                     public void run() {
-                        ChatListTab.setChatUpdate(contact, message, "now", "1");
+                        ChatListTab.setChatUpdate(contact, message, "now", 0);
                     }
                 });
             }
@@ -421,7 +422,7 @@ public class Network extends Application {
                     @Override
                     public void processMessage(Chat chat, final Message message) {
                         if (message.getType() == Message.Type.chat || message.getType() == Message.Type.normal) {
-                            if(message.getBody()!=null) {
+                            if (message.getBody() != null) {
                                 Log.d("Network", message.getFrom().substring(0, message.getFrom().indexOf("/")) + " : " + message.getBody());
 
                                 final String contact = message.getFrom().substring(0, message.getFrom().indexOf("/"));
@@ -434,26 +435,36 @@ public class Network extends Application {
 
                                 boolean found = false;
 
-                                for(int i = 0; i < chats.size(); i ++){
-                                    if(chats.get(i).getChat().equals(message.getFrom().substring(0, message.getFrom().indexOf("/")))){
+                                for (int i = 0; i < chats.size(); i++) {
+                                    if (chats.get(i).getChat().equals(message.getFrom().substring(0, message.getFrom().indexOf("/")))) {
                                         found = true;
                                     }
                                 }
 
-                                if(!found){
-                                    DatabaseHandler dbb = new DatabaseHandler(getApplicationContext());
-                                    dbb.addChat(new com.example.messenger.messenger.Chat(LoginActivity.sharedPref.getString("username", "default"), contact, message.getBody(), "now", "1"));
-                                    dbb.close();
-
+                                if (!found) {
                                     mHandler.post(new Runnable() {
                                         public void run() {
-                                            ChatListTab.setChatListChanged(contact, message.getBody(), "now", "1");
+                                            if (ChatActivity.isRunning) {
+                                                DatabaseHandler dbb = new DatabaseHandler(getApplicationContext());
+                                                dbb.addChat(new com.example.messenger.messenger.Chat(LoginActivity.sharedPref.getString("username", "default"), contact, message.getBody(), "now", 0));
+                                                ChatListTab.setChatListChanged(contact, message.getBody(), "now", 0);
+                                                dbb.close();
+                                            } else {
+                                                DatabaseHandler dbb = new DatabaseHandler(getApplicationContext());
+                                                dbb.addChat(new com.example.messenger.messenger.Chat(LoginActivity.sharedPref.getString("username", "default"), contact, message.getBody(), "now", 1));
+                                                ChatListTab.setChatListChanged(contact, message.getBody(), "now", 1);
+                                                dbb.close();
+                                            }
                                         }
                                     });
-                                }else{
+                                } else {
                                     mHandler.post(new Runnable() {
                                         public void run() {
-                                            ChatListTab.setChatUpdate(contact, message.getBody(), "now", "1");
+                                            if (ChatActivity.isRunning) {
+                                                ChatListTab.setChatUpdate(contact, message.getBody(), "now", getChatCounter(contact));
+                                            } else {
+                                                ChatListTab.setChatUpdate(contact, message.getBody(), "now", getChatCounter(contact));
+                                            }
                                         }
                                     });
                                 }
@@ -473,6 +484,23 @@ public class Network extends Application {
    }*/
     }
 
+    public int getChatCounter(String chat){
+        com.example.messenger.messenger.Chat updateCounter = new com.example.messenger.messenger.Chat();
+        int counter = 0;
+
+        DatabaseHandler db = new DatabaseHandler(getApplicationContext());
+        updateCounter = db.getChat(db.getChatID(chat));
+
+        counter = updateCounter.getCounter();
+        counter = counter + 1;
+
+        updateCounter.setCounter(counter);
+
+        db.updateChat(updateCounter);
+        db.close();
+
+        return counter;
+    }
 
     public void disconect(){
         new Thread(new Runnable() {

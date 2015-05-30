@@ -84,13 +84,13 @@ public class ChatListTab extends Fragment {
 		return chatListTab;
 	}
 
-	public static void setChatListChanged(String chat, String body, String date, String counter) {
+	public static void setChatListChanged(String chat, String body, String date, int counter) {
 		Log.d("ChatTabList", "Chat List Changed: " + chat);
 		chats.add(0, new Chat(LoginActivity.sharedPref.getString("username", "default"), chat, body, date, counter));
 		adapter.notifyDataSetChanged();
 	}
 
-	public static void setChatUpdate(String chat, String body, String date, String counter){
+	public static void setChatUpdate(String chat, String body, String date, int counter){
 
 		Log.d("ChatTabList", "Udated Chat: " + chat + " body: " + body);
 		for(int i = 0; i < chats.size(); i++){
@@ -122,7 +122,7 @@ public class ChatListTab extends Fragment {
 
 				DatabaseHandler db = new DatabaseHandler(context);
 				//para borrar un usuario solo es necesario el ID
-				db.deleteChat(new Chat(db.getChatID(chat), "", "", "", "", ""));
+				db.deleteChat(new Chat(db.getChatID(chat), "", "", "", "", 0));
 				db.close();
 
 				chats.remove(i);
@@ -137,7 +137,7 @@ public class ChatListTab extends Fragment {
 		List<Chat> reloadChats = db.getAllChats();
 		for (Chat cn : reloadChats) {
 			if(cn.getUser().equals(LoginActivity.sharedPref.getString("username", "default"))){
-				db.deleteChat(new Chat(cn.getID(), "", "", "", "", ""));
+				db.deleteChat(new Chat(cn.getID(), "", "", "", "", 0));
 			}
 		}
 		for (int i = 0; i<chats.size(); i++){

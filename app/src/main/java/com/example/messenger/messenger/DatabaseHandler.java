@@ -68,7 +68,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 + KEY_CHAT + " TEXT,"
                 + KEY_BODY + " TEXT,"
                 + KEY_SENTDATE + " TEXT,"
-                + KEY_COUNTER + " TEXT " + ")";
+                + KEY_COUNTER + " INTEGER " + ")";
         db.execSQL(CREATE_CHAT_CONTACTS_TABLE);
     }
 
@@ -120,6 +120,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(KEY_USER, chat.getUser());
         values.put(KEY_CHAT, chat.getChat());
+        values.put(KEY_BODY, chat.getBody());
+        values.put(KEY_SENTDATE, chat.getSentDate());
+        values.put(KEY_COUNTER, chat.getCounter());
 
         // Inserting Row
         db.insert(CHATS_TABLE, null, values);
@@ -171,7 +174,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             cursor.moveToFirst();
         Chat chat = new Chat(Integer.parseInt(cursor.getString(0)),
                 cursor.getString(1), cursor.getString(2), cursor.getString(3),
-                cursor.getString(4), cursor.getString(5));
+                cursor.getString(4), Integer.parseInt(cursor.getString(5)));
         // return contact
         cursor.close();
         db.close();
@@ -249,7 +252,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 chat.setChat(cursor.getString(2));
                 chat.setBody(cursor.getString(3));
                 chat.setSentDate(cursor.getString(4));
-                chat.setCounter(cursor.getString(5));
+                chat.setCounter(Integer.parseInt(cursor.getString(5)));
                 // Adding contact to list
                 chatList.add(chat);
             } while (cursor.moveToNext());
