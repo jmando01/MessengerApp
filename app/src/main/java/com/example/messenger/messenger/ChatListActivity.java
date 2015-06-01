@@ -21,6 +21,9 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import org.jivesoftware.smack.SmackException;
+import org.jivesoftware.smack.packet.Presence;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -112,7 +115,13 @@ public class ChatListActivity extends FragmentActivity {
     }
 
     public void searchBtn(MenuItem item){
-
+        Presence subscribe = new Presence(Presence.Type.subscribe);
+        subscribe.setTo("admin@localhost");
+        try {
+            ((Network) getApplication()).connection.sendStanza(subscribe);
+        } catch (SmackException.NotConnectedException e) {
+            e.printStackTrace();
+        }
     }
 
     public void settingsBtn(MenuItem item){

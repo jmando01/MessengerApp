@@ -127,7 +127,7 @@ public class ContactListTab extends Fragment {
 
 	public static void setContactListChanged(String contact){
 		Log.d("ContactTabList", "Contact List Changed: " + contact);
-		contacts.add(new Contact(LoginActivity.sharedPref.getString("username", "default"), contact, " "));
+		contacts.add(new Contact(LoginActivity.sharedPref.getString("username", "default"), contact, "<Pending>"));
 		adapter.notifyDataSetChanged();
 	}
 

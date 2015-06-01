@@ -18,16 +18,20 @@ import org.jivesoftware.smack.ConnectionListener;
 import org.jivesoftware.smack.MessageListener;
 import org.jivesoftware.smack.ReconnectionManager;
 import org.jivesoftware.smack.SmackException;
+import org.jivesoftware.smack.StanzaListener;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.chat.Chat;
 import org.jivesoftware.smack.chat.ChatManager;
 import org.jivesoftware.smack.chat.ChatManagerListener;
 import org.jivesoftware.smack.chat.ChatMessageListener;
+import org.jivesoftware.smack.filter.StanzaTypeFilter;
 import org.jivesoftware.smack.packet.DefaultExtensionElement;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Presence;
+import org.jivesoftware.smack.packet.Stanza;
 import org.jivesoftware.smack.roster.Roster;
+import org.jivesoftware.smack.roster.RosterEntry;
 import org.jivesoftware.smack.roster.RosterListener;
 import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
@@ -41,12 +45,12 @@ import java.util.TimerTask;
 
 /**
  * Created by Joubert on 09/05/2015.
- * Enviar mensajes y logica demas...
- * *Hay que terminar la parte de la horas.
- * Creo que ocurrio un error cuando se agregan contactos con diferentes cuentas en el mismo dispositivo.
+ *****Enviar mensajes y logica demas...
+ *****Hay que terminar la parte de la horas.
+ *****Hacer un buscador para los contactos.
+ ***** PONER UN AVISO DE RECONEXION.
  *
- * Hacer un buscador para los contactos.
- * PONER UN AVISO DE RECONEXION.
+ * Crear la logica para borrar un contacto que nos borra.
  * Si vuelvo a agregar el contacto que me borro nos podemos ver otra vez.
  * Cuando se borra un contacto este solo se borra por completo de la lista de roster de el que lo borro.
  * La pantalla inicial cuando se tiene el autologin no deberia de aparecer.
@@ -120,11 +124,12 @@ public class Network extends Application {
                     editor.commit();
 
                     setConnectionListener();
-                    setPresence(LoginActivity.sharedPref.getString("status", "Available"));
-
                     roster = Roster.getInstanceFor(connection);
+                    roster.setSubscriptionMode(Roster.SubscriptionMode.manual);
                     Log.d("Connect", "Roster subscription mode set to: " + roster.getSubscriptionMode());
                     setRosterListener();
+                    setPresence(LoginActivity.sharedPref.getString("status", "Available"));
+                    setSubscriptionListener();
                     setChatMessageListener();
 
                     if(!autoLogin){
@@ -228,10 +233,6 @@ public class Network extends Application {
             @Override
             public void entriesAdded(Collection<String> addresses) {
                 Log.d("Network", "Entries added: " + addresses);
-
-                for (String entry : addresses) {
-                    addRoster(entry);
-                }
             }
 
             @Override
@@ -246,7 +247,7 @@ public class Network extends Application {
 
             @Override
             public void presenceChanged(final Presence presence) {
-                Log.d("Network", "Presence Changed User: " + presence.getFrom() + " Status: " + presence.getStatus() + "Presence Type: " + presence.getType().toString());
+                Log.d("Network", "Presence Changed User: " + presence.getFrom() + " Status: " + presence.getStatus().toString());
 
                 String from = presence.getFrom().toString();
 
@@ -278,8 +279,6 @@ public class Network extends Application {
     public String addRoster(final String contact){
         //Lo que esta en null es para saber si pertenece a un grupo
         try {
-            roster.createEntry(contact, contact, null);
-
             contacts = new ArrayList<Contact>();
 
             DatabaseHandler dbb = new DatabaseHandler(getApplicationContext());
@@ -295,6 +294,8 @@ public class Network extends Application {
             }
 
             if(!found){
+                roster.createEntry(contact, contact, null);
+
                 DatabaseHandler db = new DatabaseHandler(getApplicationContext());
                 db.addContact(new Contact(LoginActivity.sharedPref.getString("username", "default"), contact, "<Pending>"));
                 db.close();
@@ -305,11 +306,11 @@ public class Network extends Application {
                     }
                 });
                 Log.d("Network", "User: " + contact + " has been added.");
+                return "success";
             }else{
                 Log.d("Network", "This contact already exist");
+                return "This contact alerady exists";
             }
-
-            return "success";
         } catch (SmackException.NotLoggedInException e) {
             Log.d("Network", "NotLoggedInException");
             e.printStackTrace();
@@ -327,6 +328,80 @@ public class Network extends Application {
             e.printStackTrace();
             return "You are not connected to Internet.";
         }
+    }
+
+    public void setSubscriptionListener(){
+        connection.addAsyncStanzaListener(new StanzaListener() {
+            @Override
+            public void processPacket(Stanza packet) throws SmackException.NotConnectedException {
+                Log.e("Network", "something called");
+                final Presence presence = (Presence) packet;
+
+                if (presence.getType() == Presence.Type.subscribe) {
+                Log.d("Network", "Incoming Packet type subscribe from: " + presence.getFrom());
+                    //from new user
+                    if (roster.getEntry(presence.getFrom()) == null) {
+                    Log.d("Network", "Roster not found!");
+                        //save request locally for later accept/reject
+                        //later accept will send back a subscribe & subscribed presence to user with fromId
+                        //or accept immediately by sending back subscribe and unsubscribed right now
+                        Presence subscribe = new Presence(Presence.Type.subscribe);
+                        subscribe.setTo(presence.getFrom());
+                        Presence subscribed = new Presence(Presence.Type.subscribed);
+                        subscribed.setTo(presence.getFrom());
+
+                        try {
+                            connection.sendStanza(subscribe);
+                            connection.sendStanza(subscribed);
+                            Log.d("Network", "Subscribe and Subscribed Sent");
+                            contacts = new ArrayList<Contact>();
+
+                            DatabaseHandler dbb = new DatabaseHandler(getApplicationContext());
+                            contacts = (ArrayList<Contact>) dbb.getAllContacts();
+                            dbb.close();
+
+                            boolean found = false;
+
+                            for(int i = 0; i < contacts.size(); i ++){
+                                if(contacts.get(i).getContact().equals(presence.getFrom())){
+                                    found = true;
+                                }
+                            }
+
+                            if(!found){
+                                DatabaseHandler db = new DatabaseHandler(getApplicationContext());
+                                db.addContact(new Contact(LoginActivity.sharedPref.getString("username", "default"), presence.getFrom(), "<Pending>"));
+                                db.close();
+
+                                mHandler.post(new Runnable() {
+                                    public void run() {
+                                        ContactListTab.setContactListChanged(presence.getFrom());
+                                    }
+                                });
+                                Log.d("Network", "User: " + presence.getFrom() + " has been added.");
+                            }else{
+                                Log.d("Network", "This contact already exist");
+                            }
+                        } catch (SmackException.NotConnectedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    //from a user that previously accepted your request
+                    else {
+                        Log.d("Network", "Roster found!");
+                        //send back subscribed presence to user with fromId
+                        Presence subscribed = new Presence(Presence.Type.subscribed);
+                        subscribed.setTo(presence.getFrom());
+                        try {
+                            connection.sendStanza(subscribed);
+                            Log.d("Network", "Subscribed Sent");
+                        } catch (SmackException.NotConnectedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+        }, new StanzaTypeFilter(Presence.class));
     }
 
     public String removeRoster(String contact){
