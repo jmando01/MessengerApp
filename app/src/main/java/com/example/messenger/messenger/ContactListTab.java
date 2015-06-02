@@ -131,7 +131,7 @@ public class ContactListTab extends Fragment {
 		adapter.notifyDataSetChanged();
 	}
 
-	public void setRemoveContactFromContactList(String contact){
+	public static void setRemoveContactFromContactList(String contact){
 
 		for(int i = 0; i < contacts.size(); i++){
 			if(contact.equals(contacts.get(i).getContact())){
