@@ -16,7 +16,11 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.jivesoftware.smack.roster.Roster;
+import org.jivesoftware.smack.roster.RosterEntry;
+
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class ContactListTab extends Fragment {
@@ -120,6 +124,7 @@ public class ContactListTab extends Fragment {
 				DatabaseHandler db = new DatabaseHandler(context);
 				db.updateContact(new Contact(db.getContactID(contact), contacts.get(i).getUser(), contacts.get(i).getContact(), status));
 				db.close();
+				Log.d("ContactTabList", "Contact: " + contact + " Status: " + status + " Updated" );
 			}
 		}
 		adapter.notifyDataSetChanged();

@@ -32,7 +32,7 @@ public class StatusActivity extends Activity {
         currentStatus = (EditText) findViewById(R.id.currentStatus);
         currentStatus.setText(LoginActivity.sharedPref.getString("status", "Available"));
 
-        String [] statusList = new String [] {"Available", "Busy", "At the phone", "At Work", "Driving"} ;
+        String [] statusList = new String [] {"Available", "Unavaliable", "At the phone", "At Work", "Driving"} ;
 
         ListView listView = (ListView) findViewById(R.id.statuslv);
 
@@ -73,11 +73,11 @@ public class StatusActivity extends Activity {
         protected String doInBackground(Void... args) {
             // TODO Auto-generated method stub
             if(((Network) getApplication()).connection.isConnected()){
-                Log.d("LoginActivity", "connectedOK");
+                Log.d("StatusActivity", "connectedOK");
                 return success = ((Network) getApplication()).setPresence(status);
             }else{
                 //No network available
-                Log.d("LoginActivity", "No Network Available");
+                Log.d("StatusActivity", "No Network Available");
                 return "No Network Available";
             }
         }

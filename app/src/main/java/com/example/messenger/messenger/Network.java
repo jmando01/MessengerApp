@@ -46,12 +46,11 @@ import java.util.TimerTask;
 /**
  * Created by Joubert on 09/05/2015.
  *****Enviar mensajes y logica demas...
- *****Hay que terminar la parte de la horas.
  *****Hacer un buscador para los contactos.
  ***** PONER UN AVISO DE RECONEXION.
  *
- * Hacer la sincronizacion de contactos.
- * Si vuelvo a agregar el contacto que me borro nos podemos ver otra vez.
+ * Hacer la sincronizacion de contactos y chats.
+ * Blocking List.
  */
 public class Network extends Application {
 
