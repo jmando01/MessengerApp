@@ -45,23 +45,21 @@ public class LoginActivity extends Activity {
 
             Log.d("LoginActivity", "Autologin");
 
+            Intent intent = new Intent(LoginActivity.this, ChatListActivity.class);
+            startActivity(intent);
+
             new Thread(new Runnable() {
                 public void run() {
 
                     username = sharedPref.getString("username", "default");
                     password = sharedPref.getString("password", "default");
 
-                    if(((Network) getApplication()).isNetworkConnected()){
-                        Log.d("LoginActivity",  "networkOK");
-                        ((Network) getApplication()).login(username, password, true, false);
-                    }else{
-                        //No network available
-                        Log.d("LoginActivity", "No Network Available. Autologin");
-                        Intent intent = new Intent(LoginActivity.this, ChatListActivity.class);
-                        startActivity(intent);
-                    }
+                    ((Network) getApplication()).login(username, password, true);
+
                 }
             }).start();
+
+            finish();
         }
     }
 
@@ -103,7 +101,7 @@ public class LoginActivity extends Activity {
 
             if(((Network) getApplication()).isNetworkConnected()){
                 Log.d("LoginActivity",  "networkOK");
-                notification = ((Network) getApplication()).login(username+Network.SERVICE, password, false, false);
+                notification = ((Network) getApplication()).login(username+Network.SERVICE, password, false);
             }else{
                 //No network available
                 Log.d("LoginActivity", "No Network Available");

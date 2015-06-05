@@ -52,7 +52,6 @@ import java.util.TimerTask;
  *
  * Hacer la sincronizacion de contactos.
  * Si vuelvo a agregar el contacto que me borro nos podemos ver otra vez.
- * La pantalla inicial cuando se tiene el autologin no deberia de aparecer.
  */
 public class Network extends Application {
 
@@ -83,7 +82,7 @@ public class Network extends Application {
             return true;
     }
 
-    public String login(String username, String password, boolean autoLogin, boolean reconnectionTimer){
+    public String login(String username, String password, boolean autoLogin){
         if((connection == null) || (!connection.isConnected() && !clreconnection)){
             // Create the configuration for this new connection
             XMPPTCPConnectionConfiguration.Builder configBuilder = XMPPTCPConnectionConfiguration.builder();
@@ -96,15 +95,6 @@ public class Network extends Application {
             ReconnectionManager.setEnabledPerDefault(true);
 
             connection = new XMPPTCPConnection(configBuilder.build());
-
-            if(autoLogin && !reconnectionTimer){
-                Log.d("Network", "Autologin");
-                Intent intent = new Intent(getApplicationContext(), ChatListActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(intent);
-
-                LoginActivity.activity.finish();
-            }
 
             try {
                 // Connect to the server
@@ -179,9 +169,9 @@ public class Network extends Application {
             @Override
             public void run() {
                 Log.d("Network", "Reconnection Timer Started..Connecting");
-                login(LoginActivity.sharedPref.getString("username", "default"), LoginActivity.sharedPref.getString("password", "default"), true, true);
+                login(LoginActivity.sharedPref.getString("username", "default"), LoginActivity.sharedPref.getString("password", "default"), true);
             }
-        }, 12 * 1000);
+        }, 6 * 1000);
     }
 
     public void setConnectionListener() {
