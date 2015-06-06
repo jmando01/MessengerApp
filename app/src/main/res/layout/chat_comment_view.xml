@@ -22,6 +22,15 @@
             android:text="Hello Bubbles!"
             android:textColor="@android:color/primary_text_light" />
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="5:46am"
+            android:id="@+id/sentDate"
+            android:layout_alignBottom="@+id/comment"
+            android:layout_toRightOf="@+id/comment"
+            android:layout_toEndOf="@+id/comment" />
+
     </RelativeLayout>
 
 </RelativeLayout>

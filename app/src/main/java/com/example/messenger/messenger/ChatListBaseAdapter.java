@@ -71,7 +71,11 @@ public class ChatListBaseAdapter  extends BaseAdapter {
         holder.txt_chat.setText((chatArrayList.get(position).getChat()));
         holder.txt_body.setText((chatArrayList.get(position).getBody()));
         holder.txt_sentDate.setText((chatArrayList.get(position).getSentDate()));
-        holder.txt_counter.setText((String.valueOf(chatArrayList.get(position).getCounter())));
+        if(String.valueOf(chatArrayList.get(position).getCounter()).equals("0")){
+            holder.txt_counter.setText(" ");
+        }else{
+            holder.txt_counter.setText((String.valueOf(chatArrayList.get(position).getCounter())));
+        }
         holder.image.setImageResource(imgid[0]);
 
         return convertView;

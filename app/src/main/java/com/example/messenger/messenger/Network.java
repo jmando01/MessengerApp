@@ -441,7 +441,7 @@ public class Network extends Application {
         }
     }
 
-    public void sendMessage(final String contact, final String message){
+    public String sendMessage(final String contact, final String message){
 
         Message msg = new Message(contact, Message.Type.chat);
         msg.setFrom(LoginActivity.sharedPref.getString("username", "default"));
@@ -451,6 +451,7 @@ public class Network extends Application {
             chats = new ArrayList<ChatList>();
 
             DatabaseHandler db = new DatabaseHandler(getApplicationContext());
+            db.addMessage(new MessageArchive(LoginActivity.sharedPref.getString("username", "default"), contact, message, "now"));
             chats = (ArrayList<ChatList>) db.getAllChats();
             db.close();
 
@@ -470,6 +471,10 @@ public class Network extends Application {
                 mHandler.post(new Runnable() {
                     public void run() {
                         ChatListTab.setChatListChanged(contact, message, "now", 0);
+                        if(ChatCommentActivity.isRunning){
+                            ChatCommentActivity.adapter.add(new ChatComment(false, message, "now"));
+                            ChatCommentActivity.lv.setSelection(ChatCommentActivity.lv.getAdapter().getCount() - 1);
+                        }
                     }
                 });
 
@@ -477,12 +482,18 @@ public class Network extends Application {
                 mHandler.post(new Runnable() {
                     public void run() {
                         ChatListTab.setChatUpdate(contact, message, "now", 0);
+                        if(ChatCommentActivity.isRunning){
+                            ChatCommentActivity.adapter.add(new ChatComment(false, message, "now"));
+                            ChatCommentActivity.lv.setSelection(ChatCommentActivity.lv.getAdapter().getCount() - 1);
+                        }
                     }
                 });
             }
+            return "success";
         } catch (SmackException.NotConnectedException e) {
             Log.d("Network", "Error sending message");
             e.printStackTrace();
+            return "Not Connected Exception";
         }
     }
 
@@ -502,6 +513,7 @@ public class Network extends Application {
                                 chats = new ArrayList<ChatList>();
 
                                 DatabaseHandler db = new DatabaseHandler(getApplicationContext());
+                                db.addMessage(new MessageArchive(contact, LoginActivity.sharedPref.getString("username", "default"), message.getBody(), "now"));
                                 chats = (ArrayList<ChatList>) db.getAllChats();
                                 db.close();
 
@@ -516,10 +528,11 @@ public class Network extends Application {
                                 if (!found) {
                                     mHandler.post(new Runnable() {
                                         public void run() {
-                                            if (ChatCommentActivity.isRunning) {
+                                            if (ChatCommentActivity.isRunning && ChatCommentActivity.contact.equals(contact)) {
                                                 DatabaseHandler dbb = new DatabaseHandler(getApplicationContext());
                                                 dbb.addChat(new ChatList(LoginActivity.sharedPref.getString("username", "default"), contact, message.getBody(), "now", 0));
                                                 ChatListTab.setChatListChanged(contact, message.getBody(), "now", 0);
+                                                ChatCommentActivity.setChatCommentChanged(message.getBody(),"now");
                                                 dbb.close();
                                             } else {
                                                 DatabaseHandler dbb = new DatabaseHandler(getApplicationContext());
@@ -532,9 +545,11 @@ public class Network extends Application {
                                 } else {
                                     mHandler.post(new Runnable() {
                                         public void run() {
-                                            if (ChatCommentActivity.isRunning) {
-                                                ChatListTab.setChatUpdate(contact, message.getBody(), "now", getChatCounter(contact));
-                                            } else {
+
+                                            if (ChatCommentActivity.isRunning && ChatCommentActivity.contact.equals(contact)) {
+                                                ChatCommentActivity.setChatCommentChanged(message.getBody(), "now");
+                                                ChatListTab.setChatUpdate(contact, message.getBody(), "now", 0);
+                                            }else{
                                                 ChatListTab.setChatUpdate(contact, message.getBody(), "now", getChatCounter(contact));
                                             }
                                         }

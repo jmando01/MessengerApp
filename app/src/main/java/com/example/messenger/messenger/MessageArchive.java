@@ -17,20 +17,20 @@ public class MessageArchive {
     }
 
     // constructor
-    public MessageArchive(int id, String fromjid, String tojid, String sentdate, String body){
+    public MessageArchive(int id, String fromjid, String tojid, String body, String sentdate){
         this._id = id;
         this._fromjid = fromjid;
         this._tojid = tojid;
-        this._sentdate = sentdate;
         this._body = body;
+        this._sentdate = sentdate;
     }
 
     // constructor
-    public MessageArchive(String fromjid, String tojid, String sentdate, String body){
+    public MessageArchive(String fromjid, String tojid, String body, String sentdate){
         this._fromjid = fromjid;
         this._tojid = tojid;
-        this._sentdate = sentdate;
         this._body = body;
+        this._sentdate = sentdate;
     }
 
     // getting ID
@@ -62,7 +62,14 @@ public class MessageArchive {
     public void setToJid(String tojid){
         this._tojid = tojid;
     }
-
+    // getting Body
+    public String getBody(){
+        return this._body;
+    }
+    // setting Body
+    public void setBody(String body){
+        this._body = body;
+    }
     // getting SentDate
     public String getSentDate(){
         return this._sentdate;
@@ -71,15 +78,5 @@ public class MessageArchive {
     // setting SentDate
     public void setSentDate(String sentdate){
         this._sentdate = sentdate;
-    }
-
-    // getting Body
-    public String getBody(){
-        return this._body;
-    }
-
-    // setting Body
-    public void setBody(String body){
-        this._body = body;
     }
 }

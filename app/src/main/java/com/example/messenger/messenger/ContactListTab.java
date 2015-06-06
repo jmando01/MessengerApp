@@ -50,11 +50,10 @@ public class ContactListTab extends Fragment {
 
 				 final Contact contact = contacts.get(position);
 
-				 new Thread(new Runnable() {
-					 public void run() {
-						 ((Network) getActivity().getApplicationContext()).sendMessage(contact.getContact(), "olis amiguis");
-					 }
-				 }).start();
+				 Intent intent = new Intent(getActivity(), ChatCommentActivity.class);
+				 intent.putExtra("contact",contact.getContact());
+				 startActivity(intent);
+
 			 }
 		 });
 

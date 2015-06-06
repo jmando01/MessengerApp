@@ -51,8 +51,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 + KEY_ID + " INTEGER PRIMARY KEY,"
                 + KEY_FROMJID + " TEXT,"
                 + KEY_TOJID + " TEXT,"
-                + KEY_SENTDATE + " TEXT,"
-                + KEY_BODY + " TEXT " + ")";
+                + KEY_BODY + " TEXT,"
+                + KEY_SENTDATE + " TEXT " + ")";
         db.execSQL(CREATE_MESSAGE_ARCHIVE_TABLE);
 
         String CREATE_CONTACTS_TABLE = "CREATE TABLE " + CONTACTS_TABLE + "("
@@ -94,8 +94,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(KEY_FROMJID, message.getFromJid());
         values.put(KEY_TOJID, message.getToJid());
-        values.put(KEY_SENTDATE, message.getSentDate());
         values.put(KEY_BODY, message.getBody());
+        values.put(KEY_SENTDATE, message.getSentDate());
 
         // Inserting Row
         db.insert(MESSAGE_ARCHIVE_TABLE, null, values);
@@ -134,7 +134,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
 
         Cursor cursor = db.query(MESSAGE_ARCHIVE_TABLE, new String[]{KEY_ID,
-                        KEY_FROMJID, KEY_TOJID, KEY_SENTDATE, KEY_BODY}, KEY_ID + "=?",
+                        KEY_FROMJID, KEY_TOJID, KEY_BODY, KEY_SENTDATE}, KEY_ID + "=?",
                 new String[]{String.valueOf(id)}, null, null, null, null);
         if (cursor != null)
             cursor.moveToFirst();
@@ -185,7 +185,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public List<MessageArchive> getAllMessages() {
         List<MessageArchive> messageList = new ArrayList<MessageArchive>();
         // Select All Query
-        String selectQuery = "SELECT * FROM " + MESSAGE_ARCHIVE_TABLE + " WHERE user = '"+ LoginActivity.sharedPref.getString("username", "default") +"'";
+        String selectQuery = "SELECT * FROM " + MESSAGE_ARCHIVE_TABLE;
 
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
@@ -197,8 +197,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 message.setID(Integer.parseInt(cursor.getString(0)));
                 message.setFromJid(cursor.getString(1));
                 message.setToJid(cursor.getString(2));
-                message.setSentDate(cursor.getString(3));
-                message.setBody(cursor.getString(4));
+                message.setBody(cursor.getString(3));
+                message.setSentDate(cursor.getString(4));
 
                 // Adding contact to list
                 messageList.add(message);
@@ -270,8 +270,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(KEY_FROMJID, message.getFromJid());
         values.put(KEY_TOJID, message.getToJid());
-        values.put(KEY_SENTDATE, message.getSentDate());
         values.put(KEY_BODY, message.getBody());
+        values.put(KEY_SENTDATE, message.getSentDate());
         // updating row
         db.update(MESSAGE_ARCHIVE_TABLE, values, KEY_ID + " = ?",
                 new String[] { String.valueOf(message.getID()) });
