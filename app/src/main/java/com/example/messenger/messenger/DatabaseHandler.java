@@ -115,7 +115,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     }
 
     // Adding new chat
-    void addChat(Chat chat) {
+    void addChat(ChatList chat) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(KEY_USER, chat.getUser());
@@ -164,7 +164,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     }
 
     // Getting single Chat
-    Chat getChat(int id) {
+    ChatList getChat(int id) {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.query(CHATS_TABLE, new String[]{KEY_ID,
                         KEY_USER, KEY_CHAT, KEY_BODY, KEY_SENTDATE,
@@ -172,7 +172,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 new String[]{String.valueOf(id)}, null, null, null, null);
         if (cursor != null)
             cursor.moveToFirst();
-        Chat chat = new Chat(Integer.parseInt(cursor.getString(0)),
+        ChatList chat = new ChatList(Integer.parseInt(cursor.getString(0)),
                 cursor.getString(1), cursor.getString(2), cursor.getString(3),
                 cursor.getString(4), Integer.parseInt(cursor.getString(5)));
         // return contact
@@ -237,8 +237,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     }
 
     // Getting All Chats
-    public List<Chat> getAllChats() {
-        List<Chat> chatList = new ArrayList<Chat>();
+    public List<ChatList> getAllChats() {
+        List<ChatList> chatList = new ArrayList<ChatList>();
         // Select All Query
         String selectQuery = "SELECT * FROM " + CHATS_TABLE + " WHERE user = '"+ LoginActivity.sharedPref.getString("username", "default") +"'";
         SQLiteDatabase db = this.getWritableDatabase();
@@ -246,7 +246,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         // looping through all rows and adding to list
         if (cursor.moveToFirst()) {
             do {
-                Chat chat = new Chat();
+                ChatList chat = new ChatList();
                 chat.setID(Integer.parseInt(cursor.getString(0)));
                 chat.setUser(cursor.getString(1));
                 chat.setChat(cursor.getString(2));
@@ -292,7 +292,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     }
 
     // Updating single chat
-    public void updateChat(Chat chat) {
+    public void updateChat(ChatList chat) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(KEY_USER, chat.getUser());
@@ -323,7 +323,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     }
 
     // Deleting single chat
-    public void deleteChat(Chat chat) {
+    public void deleteChat(ChatList chat) {
         SQLiteDatabase db = this.getWritableDatabase();
         db.delete(CHATS_TABLE, KEY_ID + " = ?",
                 new String[]{String.valueOf(chat.getID()) });

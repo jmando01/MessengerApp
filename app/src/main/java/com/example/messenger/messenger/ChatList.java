@@ -3,7 +3,7 @@ package com.example.messenger.messenger;
 /**
  * Created by Joubert on 17/05/2015.
  */
-public class Chat {
+public class ChatList {
     //private variables
 
     int _id;
@@ -14,12 +14,12 @@ public class Chat {
     private int _counter;
 
     // Empty constructor
-    public Chat(){
+    public ChatList(){
 
     }
 
     // constructor
-    public Chat(int id, String user, String chat, String body, String sentDate, int counter){
+    public ChatList(int id, String user, String chat, String body, String sentDate, int counter){
         this._id = id;
         this._user = user;
         this._chat = chat;
@@ -29,7 +29,7 @@ public class Chat {
     }
 
     // constructor
-    public Chat(String user, String chat, String body, String sentDate, int counter){
+    public ChatList(String user, String chat, String body, String sentDate, int counter){
         this._user = user;
         this._chat = chat;
         this._body = body;

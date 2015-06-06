@@ -8,14 +8,12 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.CountDownTimer;
 import android.os.Handler;
 import android.util.Log;
 
 import org.jivesoftware.smack.AbstractXMPPConnection;
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.ConnectionListener;
-import org.jivesoftware.smack.MessageListener;
 import org.jivesoftware.smack.ReconnectionManager;
 import org.jivesoftware.smack.SmackException;
 import org.jivesoftware.smack.StanzaListener;
@@ -26,12 +24,10 @@ import org.jivesoftware.smack.chat.ChatManager;
 import org.jivesoftware.smack.chat.ChatManagerListener;
 import org.jivesoftware.smack.chat.ChatMessageListener;
 import org.jivesoftware.smack.filter.StanzaTypeFilter;
-import org.jivesoftware.smack.packet.DefaultExtensionElement;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.packet.Stanza;
 import org.jivesoftware.smack.roster.Roster;
-import org.jivesoftware.smack.roster.RosterEntry;
 import org.jivesoftware.smack.roster.RosterListener;
 import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
@@ -39,7 +35,6 @@ import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -67,7 +62,7 @@ public class Network extends Application {
     private Roster roster;
     private Handler mHandler = new Handler();
     private ArrayList<Contact> contacts;
-    private ArrayList<com.example.messenger.messenger.Chat> chats;
+    private ArrayList<ChatList> chats;
 
     public static String SERVICE = "@localhost";
 
@@ -453,10 +448,10 @@ public class Network extends Application {
         msg.setBody(message);
         try {
             connection.sendStanza(msg);
-            chats = new ArrayList<com.example.messenger.messenger.Chat>();
+            chats = new ArrayList<ChatList>();
 
             DatabaseHandler db = new DatabaseHandler(getApplicationContext());
-            chats = (ArrayList<com.example.messenger.messenger.Chat>) db.getAllChats();
+            chats = (ArrayList<ChatList>) db.getAllChats();
             db.close();
 
             boolean found = false;
@@ -469,7 +464,7 @@ public class Network extends Application {
 
             if(!found){
                 DatabaseHandler dbb = new DatabaseHandler(getApplicationContext());
-                dbb.addChat(new com.example.messenger.messenger.Chat(LoginActivity.sharedPref.getString("username", "default"), contact, message, "now", 0));
+                dbb.addChat(new ChatList(LoginActivity.sharedPref.getString("username", "default"), contact, message, "now", 0));
                 dbb.close();
 
                 mHandler.post(new Runnable() {
@@ -504,10 +499,10 @@ public class Network extends Application {
 
                                 final String contact = message.getFrom().substring(0, message.getFrom().indexOf("/"));
 
-                                chats = new ArrayList<com.example.messenger.messenger.Chat>();
+                                chats = new ArrayList<ChatList>();
 
                                 DatabaseHandler db = new DatabaseHandler(getApplicationContext());
-                                chats = (ArrayList<com.example.messenger.messenger.Chat>) db.getAllChats();
+                                chats = (ArrayList<ChatList>) db.getAllChats();
                                 db.close();
 
                                 boolean found = false;
@@ -521,14 +516,14 @@ public class Network extends Application {
                                 if (!found) {
                                     mHandler.post(new Runnable() {
                                         public void run() {
-                                            if (ChatActivity.isRunning) {
+                                            if (ChatCommentActivity.isRunning) {
                                                 DatabaseHandler dbb = new DatabaseHandler(getApplicationContext());
-                                                dbb.addChat(new com.example.messenger.messenger.Chat(LoginActivity.sharedPref.getString("username", "default"), contact, message.getBody(), "now", 0));
+                                                dbb.addChat(new ChatList(LoginActivity.sharedPref.getString("username", "default"), contact, message.getBody(), "now", 0));
                                                 ChatListTab.setChatListChanged(contact, message.getBody(), "now", 0);
                                                 dbb.close();
                                             } else {
                                                 DatabaseHandler dbb = new DatabaseHandler(getApplicationContext());
-                                                dbb.addChat(new com.example.messenger.messenger.Chat(LoginActivity.sharedPref.getString("username", "default"), contact, message.getBody(), "now", 1));
+                                                dbb.addChat(new ChatList(LoginActivity.sharedPref.getString("username", "default"), contact, message.getBody(), "now", 1));
                                                 ChatListTab.setChatListChanged(contact, message.getBody(), "now", 1);
                                                 dbb.close();
                                             }
@@ -537,7 +532,7 @@ public class Network extends Application {
                                 } else {
                                     mHandler.post(new Runnable() {
                                         public void run() {
-                                            if (ChatActivity.isRunning) {
+                                            if (ChatCommentActivity.isRunning) {
                                                 ChatListTab.setChatUpdate(contact, message.getBody(), "now", getChatCounter(contact));
                                             } else {
                                                 ChatListTab.setChatUpdate(contact, message.getBody(), "now", getChatCounter(contact));
@@ -551,10 +546,10 @@ public class Network extends Application {
 
                                 final String contact = message.getFrom().substring(0, message.getFrom().indexOf("/"));
 
-                                chats = new ArrayList<com.example.messenger.messenger.Chat>();
+                                chats = new ArrayList<ChatList>();
 
                                 DatabaseHandler db = new DatabaseHandler(getApplicationContext());
-                                chats = (ArrayList<com.example.messenger.messenger.Chat>) db.getAllChats();
+                                chats = (ArrayList<ChatList>) db.getAllChats();
                                 db.close();
 
                                 boolean found = false;
@@ -613,7 +608,7 @@ public class Network extends Application {
     }
 
     public int getChatCounter(String chat){
-        com.example.messenger.messenger.Chat updateCounter = new com.example.messenger.messenger.Chat();
+        ChatList updateCounter = new ChatList();
         int counter = 0;
 
         DatabaseHandler db = new DatabaseHandler(getApplicationContext());

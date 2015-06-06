@@ -71,7 +71,7 @@ public class ContactListTab extends Fragment {
 				 builder.setItems(items, new DialogInterface.OnClickListener() {
 					 public void onClick(DialogInterface dialog, int item) {
 						 if (item == 0) {
-							 Intent intent = new Intent(getActivity(), ChatActivity.class);
+							 Intent intent = new Intent(getActivity(), ChatCommentActivity.class);
 							 intent.putExtra("contact",contact.getContact());
 							 startActivity(intent);
 						 }

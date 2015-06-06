@@ -37,7 +37,7 @@
             android:label="@string/title_activity_settings" >
         </activity>
         <activity
-            android:name=".ChatActivity"
+            android:name=".ChatCommentActivity"
             android:label="@string/title_activity_chat" >
         </activity>
     </application>

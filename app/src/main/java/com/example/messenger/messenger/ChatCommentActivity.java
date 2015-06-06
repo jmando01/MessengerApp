@@ -6,11 +6,14 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ListView;
 
 
-public class ChatActivity extends Activity {
+public class ChatCommentActivity extends Activity {
 
     public static boolean isRunning;
+    private static ChatCommentBaseAdapter adapter;
+    private static ListView lv;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -18,6 +21,15 @@ public class ChatActivity extends Activity {
         setContentView(R.layout.activity_chat);
 
         isRunning = true;
+
+        lv = (ListView) findViewById(R.id.chatCommentLv);
+        lv.setDivider(null);
+        adapter = new ChatCommentBaseAdapter(getApplicationContext(), R.layout.chat_comment_view);
+        lv.setAdapter(adapter);
+
+        adapter.add(new ChatComment(true, "Hola baby", " "));
+        adapter.add(new ChatComment(false, "Como estas?", " "));
+        adapter.add(new ChatComment(true, "bien y tu?", " "));
     }
 
     @Override

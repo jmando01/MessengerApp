@@ -24,7 +24,7 @@ public class ChatListTab extends Fragment {
 
 	private Handler mHandler = new Handler();
 	public static ChatListBaseAdapter adapter = null;
-	public static ArrayList<Chat> chats;
+	public static ArrayList<ChatList> chats;
 	public static Context context;
 
 	@Override
@@ -45,8 +45,8 @@ public class ChatListTab extends Fragment {
 			@Override
 			public void onItemClick(AdapterView<?> a, View v, int position, long id) {
 
-				Chat chat = chats.get(position);
-				Intent intent = new Intent(getActivity(), ChatActivity.class);
+				ChatList chat = chats.get(position);
+				Intent intent = new Intent(getActivity(), ChatCommentActivity.class);
 				intent.putExtra("contact",chat.getChat());
 				startActivity(intent);
 
@@ -57,7 +57,7 @@ public class ChatListTab extends Fragment {
 			@Override
 			public boolean onItemLongClick(AdapterView<?> parent, final View view, int position, long id) {
 
-				final Chat chat = chats.get(position);
+				final ChatList chat = chats.get(position);
 
 				CharSequence[] items = {"Send a Message", "Delete Chat"};
 
@@ -66,7 +66,7 @@ public class ChatListTab extends Fragment {
 				builder.setItems(items, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int item) {
 						if (item == 0) {
-							Intent intent = new Intent(getActivity(), ChatActivity.class);
+							Intent intent = new Intent(getActivity(), ChatCommentActivity.class);
 							intent.putExtra("contact",chat.getChat());
 							startActivity(intent);
 						}
@@ -86,7 +86,7 @@ public class ChatListTab extends Fragment {
 
 	public static void setChatListChanged(String chat, String body, String date, int counter) {
 		Log.d("ChatTabList", "Chat List Changed: " + chat);
-		chats.add(0, new Chat(LoginActivity.sharedPref.getString("username", "default"), chat, body, date, counter));
+		chats.add(0, new ChatList(LoginActivity.sharedPref.getString("username", "default"), chat, body, date, counter));
 		adapter.notifyDataSetChanged();
 	}
 
@@ -96,7 +96,7 @@ public class ChatListTab extends Fragment {
 		for(int i = 0; i < chats.size(); i++){
 			if(chat.equals(chats.get(i).getChat())){
 
-				Chat updateChat = new Chat();
+				ChatList updateChat = new ChatList();
 
 				updateChat.setUser(LoginActivity.sharedPref.getString("username", "default"));
 				updateChat.setChat(chat);
@@ -108,7 +108,7 @@ public class ChatListTab extends Fragment {
 				chats.add(0, updateChat);
 
 				DatabaseHandler db = new DatabaseHandler(context);
-				db.updateChat(new Chat(db.getChatID(chat), LoginActivity.sharedPref.getString("username", "default"), chat, body, date, counter));
+				db.updateChat(new ChatList(db.getChatID(chat), LoginActivity.sharedPref.getString("username", "default"), chat, body, date, counter));
 				db.close();
 			}
 		}
@@ -122,7 +122,7 @@ public class ChatListTab extends Fragment {
 
 				DatabaseHandler db = new DatabaseHandler(context);
 				//para borrar un usuario solo es necesario el ID
-				db.deleteChat(new Chat(db.getChatID(chat), "", "", "", "", 0));
+				db.deleteChat(new ChatList(db.getChatID(chat), "", "", "", "", 0));
 				db.close();
 
 				chats.remove(i);
@@ -134,23 +134,23 @@ public class ChatListTab extends Fragment {
 
 	public static void reloadChatList(){
 		DatabaseHandler db = new DatabaseHandler(context);
-		List<Chat> reloadChats = db.getAllChats();
-		for (Chat cn : reloadChats) {
+		List<ChatList> reloadChats = db.getAllChats();
+		for (ChatList cn : reloadChats) {
 			if(cn.getUser().equals(LoginActivity.sharedPref.getString("username", "default"))){
-				db.deleteChat(new Chat(cn.getID(), "", "", "", "", 0));
+				db.deleteChat(new ChatList(cn.getID(), "", "", "", "", 0));
 			}
 		}
 		for (int i = 0; i<chats.size(); i++){
-			db.addChat(new Chat(LoginActivity.sharedPref.getString("username", "default"), chats.get(i).getChat(), chats.get(i).getBody(), chats.get(i).getSentDate(), chats.get(i).getCounter()));
+			db.addChat(new ChatList(LoginActivity.sharedPref.getString("username", "default"), chats.get(i).getChat(), chats.get(i).getBody(), chats.get(i).getSentDate(), chats.get(i).getCounter()));
 		}
 		db.close();
 	}
 
 	public static void refreshChatList(){
-		chats = new ArrayList<Chat>();
+		chats = new ArrayList<ChatList>();
 
 		DatabaseHandler db = new DatabaseHandler(context);
-		chats = (ArrayList<Chat>) db.getAllChats();
+		chats = (ArrayList<ChatList>) db.getAllChats();
 		db.close();
 	}
 }

@@ -15,7 +15,7 @@ import java.util.ArrayList;
 
 public class ChatListBaseAdapter  extends BaseAdapter {
 
-    private static ArrayList<Chat> chatArrayList;
+    private static ArrayList<ChatList> chatArrayList;
 
     private Integer[] imgid = {
             R.drawable.ic_action_person,
@@ -24,17 +24,17 @@ public class ChatListBaseAdapter  extends BaseAdapter {
 
     private LayoutInflater l_Inflater;
 
-    public ChatListBaseAdapter(Context context, ArrayList<Chat> results) {
+    public ChatListBaseAdapter(Context context, ArrayList<ChatList> results) {
         chatArrayList = results;
         l_Inflater = LayoutInflater.from(context);
     }
 
-    public void removeChat(Chat chat){
+    public void removeChat(ChatList chat){
         chatArrayList.remove(chat);
         notifyDataSetChanged();
     }
 
-    public void addChat(Chat chat) {
+    public void addChat(ChatList chat) {
         chatArrayList.add(chat);
         notifyDataSetChanged();
     }
