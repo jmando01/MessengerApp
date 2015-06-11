@@ -58,11 +58,15 @@ public class SettingsActivity extends Activity {
                         public void onClick(DialogInterface dialog, int item) {
                             // Do something with the selection
                             if(item == 0){
-
+                                Toast.makeText(getApplicationContext(),
+                                        "Under Construction...", Toast.LENGTH_LONG)
+                                        .show();
                             }
 
                             if(item == 1){
-
+                                Toast.makeText(getApplicationContext(),
+                                        "Under Construction...", Toast.LENGTH_LONG)
+                                        .show();
                             }
                         }
                     });
@@ -71,7 +75,9 @@ public class SettingsActivity extends Activity {
                 }
 
                 if(position == 1){
-
+                    Toast.makeText(getApplicationContext(),
+                            "Under Construction...", Toast.LENGTH_LONG)
+                            .show();
                 }
 
                 if(position == 2){
@@ -84,7 +90,9 @@ public class SettingsActivity extends Activity {
                         public void onClick(DialogInterface dialog, int item) {
                             // Do something with the selection
                             if(item == 0){
-
+                                Toast.makeText(getApplicationContext(),
+                                        "Under Construction...", Toast.LENGTH_LONG)
+                                        .show();
                             }
 
                             if(item == 1){
@@ -174,7 +182,9 @@ public class SettingsActivity extends Activity {
                 }
 
                 if(position == 3){
-
+                    Toast.makeText(getApplicationContext(),
+                            "Under Construction...", Toast.LENGTH_LONG)
+                            .show();
                 }
             }
         });

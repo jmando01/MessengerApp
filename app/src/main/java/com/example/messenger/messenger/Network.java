@@ -61,7 +61,7 @@ public class Network extends Application {
 
     public AbstractXMPPConnection connection;
 
-    private String HOST = "192.168.1.2";
+    private String HOST = "jmando01.ddns.net";
     private String OPENFIRESERVICE = "localhost";
     private String RESOURCE = "Home";
     private int PORT = 5222;

@@ -13,6 +13,6 @@ public class Android extends Fragment {
 	            Bundle savedInstanceState) {
 	 
 	        View android = inflater.inflate(R.layout.android_frag, container, false);
-	        ((TextView)android.findViewById(R.id.textView)).setText("Android");
+	        ((TextView)android.findViewById(R.id.textView)).setText("Under Construction...");
 	        return android;
 }}

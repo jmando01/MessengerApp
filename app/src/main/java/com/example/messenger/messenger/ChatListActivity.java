@@ -124,7 +124,9 @@ public class ChatListActivity extends FragmentActivity {
 
     public void searchBtn(MenuItem item){
         //hay que crear el metodo para buscar los contactos
-        ((Network) getApplication()).setNotification("hola, como estas?", "admin2@localhost");
+        Toast.makeText(getApplicationContext(),
+                "Under Construction...", Toast.LENGTH_LONG)
+                .show();
     }
 
     public void settingsBtn(MenuItem item){
