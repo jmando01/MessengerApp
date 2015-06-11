@@ -1,6 +1,8 @@
 package com.example.messenger.messenger;
 
 import android.app.Activity;
+import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.support.v7.app.ActionBarActivity;
@@ -46,15 +48,17 @@ public class ChatCommentActivity extends Activity {
 
         for (MessageArchive cn : messages) {
             if(cn.getFromJid().equals(contact) && cn.getToJid().equals(LoginActivity.sharedPref.getString("username", "default"))){
-                adapter.add(new ChatComment(true, cn.getBody(), "now"));
+                adapter.add(new ChatComment(true, cn.getBody(), cn.getSentDate()));
             }
             if(cn.getFromJid().equals(LoginActivity.sharedPref.getString("username", "default")) && cn.getToJid().equals(contact)){
-                adapter.add(new ChatComment(false, cn.getBody(), "now"));
+                adapter.add(new ChatComment(false, cn.getBody(), cn.getSentDate()));
             }
         }
 
         DatabaseHandler dbb = new DatabaseHandler(getApplicationContext());
-        ChatListTab.setChatUpdate(contact, dbb.getChat(dbb.getChatID(contact)).getBody(), "now", 0);
+        if(dbb.getChatsCount() > 0){
+            ChatListTab.setChatUpdate(contact, dbb.getChat(dbb.getChatID(contact)).getBody(),dbb.getChat(dbb.getChatID(contact)).getSentDate() , 0);
+        }
         dbb.close();
 
         lv.setSelection(lv.getAdapter().getCount()-1);

@@ -92,7 +92,7 @@ public class ChatListTab extends Fragment {
 
 	public static void setChatUpdate(String chat, String body, String date, int counter){
 
-		Log.d("ChatTabList", "Udated Chat: " + chat + " body: " + body);
+		Log.d("ChatTabList", "Updated Chat: " + chat + " body: " + body);
 		for(int i = 0; i < chats.size(); i++){
 			if(chat.equals(chats.get(i).getChat())){
 

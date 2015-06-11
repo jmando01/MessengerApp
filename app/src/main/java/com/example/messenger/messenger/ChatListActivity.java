@@ -3,6 +3,8 @@ package com.example.messenger.messenger;
 import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.app.FragmentTransaction;
+import android.app.NotificationManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -41,6 +43,12 @@ public class ChatListActivity extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat_list);
+
+        NotificationManager myNotificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        // remove the notification with the specific id
+        myNotificationManager.cancel(111);
 
         isRunning = true;
 
@@ -115,13 +123,8 @@ public class ChatListActivity extends FragmentActivity {
     }
 
     public void searchBtn(MenuItem item){
-        Presence subscribe = new Presence(Presence.Type.subscribe);
-        subscribe.setTo("admin@localhost");
-        try {
-            ((Network) getApplication()).connection.sendStanza(subscribe);
-        } catch (SmackException.NotConnectedException e) {
-            e.printStackTrace();
-        }
+        //hay que crear el metodo para buscar los contactos
+        ((Network) getApplication()).setNotification("hola, como estas?", "admin2@localhost");
     }
 
     public void settingsBtn(MenuItem item){
@@ -199,6 +202,16 @@ public class ChatListActivity extends FragmentActivity {
         ChatListTab.reloadChatList();
         Log.d("ChatListActivity", "onPause");
         super.onPause();
+    }
+
+    @Override
+    protected void onDestroy(){
+        NotificationManager myNotificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        // remove the notification with the specific id
+        myNotificationManager.cancel(111);
+        super.onDestroy();
     }
 
     @Override

@@ -38,7 +38,7 @@
         </activity>
         <activity
             android:name=".ChatCommentActivity"
-            android:label="@string/title_activity_chat" >
+            android:label="@string/title_activity_chat">
         </activity>
     </application>
 

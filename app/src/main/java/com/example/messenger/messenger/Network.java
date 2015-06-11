@@ -2,6 +2,9 @@ package com.example.messenger.messenger;
 
 import android.app.AlertDialog;
 import android.app.Application;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -9,6 +12,8 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Handler;
+import android.support.v4.app.TaskStackBuilder;
+import android.text.format.DateUtils;
 import android.util.Log;
 
 import org.jivesoftware.smack.AbstractXMPPConnection;
@@ -31,19 +36,21 @@ import org.jivesoftware.smack.roster.Roster;
 import org.jivesoftware.smack.roster.RosterListener;
 import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
+import org.jivesoftware.smackx.delay.packet.DelayInformation;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
 /**
  * Created by Joubert on 09/05/2015.
- *****Enviar mensajes y logica demas...
  *****Hacer un buscador para los contactos.
- ***** PONER UN AVISO DE RECONEXION.
- *
+ *****PONER UN AVISO DE RECONEXION.
+ *****Notificaciones.
  * Hacer la sincronizacion de contactos y chats.
  * Blocking List.
  */
@@ -51,7 +58,7 @@ public class Network extends Application {
 
     public AbstractXMPPConnection connection;
 
-    private String HOST = "192.168.1.4";
+    private String HOST = "192.168.1.2";
     private String OPENFIRESERVICE = "localhost";
     private String RESOURCE = "Home";
     private int PORT = 5222;
@@ -450,8 +457,12 @@ public class Network extends Application {
             connection.sendStanza(msg);
             chats = new ArrayList<ChatList>();
 
+            String messageTime;
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            messageTime = sdf.format(new Date());
+
             DatabaseHandler db = new DatabaseHandler(getApplicationContext());
-            db.addMessage(new MessageArchive(LoginActivity.sharedPref.getString("username", "default"), contact, message, "now"));
+            db.addMessage(new MessageArchive(LoginActivity.sharedPref.getString("username", "default"), contact, message, TimeConverter(messageTime)));
             chats = (ArrayList<ChatList>) db.getAllChats();
             db.close();
 
@@ -465,25 +476,27 @@ public class Network extends Application {
 
             if(!found){
                 DatabaseHandler dbb = new DatabaseHandler(getApplicationContext());
-                dbb.addChat(new ChatList(LoginActivity.sharedPref.getString("username", "default"), contact, message, "now", 0));
+                dbb.addChat(new ChatList(LoginActivity.sharedPref.getString("username", "default"), contact, message, TimeConverter(messageTime), 0));
                 dbb.close();
 
+                final String finalMessageTime = messageTime;
                 mHandler.post(new Runnable() {
                     public void run() {
-                        ChatListTab.setChatListChanged(contact, message, "now", 0);
+                        ChatListTab.setChatListChanged(contact, message, TimeConverter(finalMessageTime), 0);
                         if(ChatCommentActivity.isRunning){
-                            ChatCommentActivity.adapter.add(new ChatComment(false, message, "now"));
+                            ChatCommentActivity.adapter.add(new ChatComment(false, message, TimeConverter(finalMessageTime)));
                             ChatCommentActivity.lv.setSelection(ChatCommentActivity.lv.getAdapter().getCount() - 1);
                         }
                     }
                 });
 
             }else{
+                final String finalMessageTime1 = messageTime;
                 mHandler.post(new Runnable() {
                     public void run() {
-                        ChatListTab.setChatUpdate(contact, message, "now", 0);
+                        ChatListTab.setChatUpdate(contact, message, TimeConverter(finalMessageTime1), 0);
                         if(ChatCommentActivity.isRunning){
-                            ChatCommentActivity.adapter.add(new ChatComment(false, message, "now"));
+                            ChatCommentActivity.adapter.add(new ChatComment(false, message, TimeConverter(finalMessageTime1)));
                             ChatCommentActivity.lv.setSelection(ChatCommentActivity.lv.getAdapter().getCount() - 1);
                         }
                     }
@@ -506,14 +519,39 @@ public class Network extends Application {
                     public void processMessage(Chat chat, final Message message) {
                         if (message.getType() == Message.Type.chat || message.getType() == Message.Type.normal) {
                             if (message.getBody() != null && !message.getBody().equals("<customevent=?removeroster>")) {
+                                Log.d("Network", message.toString());
                                 Log.d("Network", message.getFrom().substring(0, message.getFrom().indexOf("/")) + " : " + message.getBody());
 
+                                String messageTime = "";
+
+                                DelayInformation inf = null;
+                                try {
+                                    inf = message.getExtension("delay", "urn:xmpp:delay");
+                                } catch (Exception e) {
+                                    e.getStackTrace();
+                                }
+                                // get offline message timestamp
+                                if (inf != null) {
+                                    Date date = inf.getStamp();
+                                    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                                    String offlineTimeStamp = formatter.format(date);
+                                    Log.d("Network", "offlineTimeStamp: " + offlineTimeStamp);
+                                    messageTime = offlineTimeStamp;
+                                }
+
+                                if(messageTime.equals("")){
+                                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                                    messageTime = sdf.format(new Date());
+                                }
+
                                 final String contact = message.getFrom().substring(0, message.getFrom().indexOf("/"));
+
+                                //setNotification(message.getBody(), contact);
 
                                 chats = new ArrayList<ChatList>();
 
                                 DatabaseHandler db = new DatabaseHandler(getApplicationContext());
-                                db.addMessage(new MessageArchive(contact, LoginActivity.sharedPref.getString("username", "default"), message.getBody(), "now"));
+                                db.addMessage(new MessageArchive(contact, LoginActivity.sharedPref.getString("username", "default"), message.getBody(), TimeConverter(messageTime)));
                                 chats = (ArrayList<ChatList>) db.getAllChats();
                                 db.close();
 
@@ -526,38 +564,40 @@ public class Network extends Application {
                                 }
 
                                 if (!found) {
+                                    final String finalMessageTime = messageTime;
                                     mHandler.post(new Runnable() {
                                         public void run() {
                                             if (ChatCommentActivity.isRunning && ChatCommentActivity.contact.equals(contact)) {
                                                 DatabaseHandler dbb = new DatabaseHandler(getApplicationContext());
-                                                dbb.addChat(new ChatList(LoginActivity.sharedPref.getString("username", "default"), contact, message.getBody(), "now", 0));
-                                                ChatListTab.setChatListChanged(contact, message.getBody(), "now", 0);
-                                                ChatCommentActivity.setChatCommentChanged(message.getBody(),"now");
+                                                dbb.addChat(new ChatList(LoginActivity.sharedPref.getString("username", "default"), contact, message.getBody(), TimeConverter(finalMessageTime), 0));
+                                                ChatListTab.setChatListChanged(contact, message.getBody(), TimeConverter(finalMessageTime), 0);
+                                                ChatCommentActivity.setChatCommentChanged(message.getBody(), TimeConverter(finalMessageTime));
                                                 dbb.close();
                                             } else {
                                                 DatabaseHandler dbb = new DatabaseHandler(getApplicationContext());
-                                                dbb.addChat(new ChatList(LoginActivity.sharedPref.getString("username", "default"), contact, message.getBody(), "now", 1));
-                                                ChatListTab.setChatListChanged(contact, message.getBody(), "now", 1);
+                                                dbb.addChat(new ChatList(LoginActivity.sharedPref.getString("username", "default"), contact, message.getBody(), TimeConverter(finalMessageTime), 1));
+                                                ChatListTab.setChatListChanged(contact, message.getBody(), TimeConverter(finalMessageTime), 1);
                                                 dbb.close();
                                             }
                                         }
                                     });
                                 } else {
+                                    final String finalMessageTime1 = messageTime;
                                     mHandler.post(new Runnable() {
                                         public void run() {
 
                                             if (ChatCommentActivity.isRunning && ChatCommentActivity.contact.equals(contact)) {
-                                                ChatCommentActivity.setChatCommentChanged(message.getBody(), "now");
-                                                ChatListTab.setChatUpdate(contact, message.getBody(), "now", 0);
-                                            }else{
-                                                ChatListTab.setChatUpdate(contact, message.getBody(), "now", getChatCounter(contact));
+                                                ChatCommentActivity.setChatCommentChanged(message.getBody(), TimeConverter(finalMessageTime1));
+                                                ChatListTab.setChatUpdate(contact, message.getBody(), TimeConverter(finalMessageTime1), 0);
+                                            } else {
+                                                ChatListTab.setChatUpdate(contact, message.getBody(), TimeConverter(finalMessageTime1), getChatCounter(contact));
                                             }
                                         }
                                     });
                                 }
                             }
                             //esta parte elimina un contacto que nos elimino.
-                            if(message.getBody().equals("<customevent=?removeroster>")){
+                            if (message.getBody().equals("<customevent=?removeroster>")) {
 
                                 final String contact = message.getFrom().substring(0, message.getFrom().indexOf("/"));
 
@@ -575,7 +615,7 @@ public class Network extends Application {
                                     }
                                 }
 
-                                if(found){
+                                if (found) {
                                     mHandler.post(new Runnable() {
                                         public void run() {
                                             ChatListTab.setRemoveChatFromChatList(contact);
@@ -598,7 +638,7 @@ public class Network extends Application {
                                     }
                                 }
 
-                                if(found){
+                                if (found) {
                                     mHandler.post(new Runnable() {
                                         public void run() {
                                             ContactListTab.setRemoveContactFromContactList(contact);
@@ -620,6 +660,53 @@ public class Network extends Application {
    } else if(message.getType() == Message.Type.error) {
       //error message
    }*/
+    }
+
+    public void setNotification(final String message, final String contact){
+
+        mHandler.post(new Runnable() {
+            public void run() {
+                NotificationManager myNotificationManager;
+                int notificationIdOne = 111;
+                int numMessagesOne = 0;
+
+
+                // Invoking the default notification service
+                Notification.Builder mBuilder = new Notification.Builder(getApplicationContext());
+
+                mBuilder.setContentTitle(contact);
+                mBuilder.setContentText(message);
+                mBuilder.setTicker(contact + ": " + message);
+                mBuilder.setSmallIcon(R.drawable.ic_launcher);
+
+                // Increase notification number every time a new notification arrives
+                mBuilder.setNumber(++numMessagesOne);
+
+                // Creates an explicit intent for an Activity in your app
+                Intent resultIntent = new Intent(getApplicationContext(), LoginActivity.class);
+                resultIntent.putExtra("notificationId", notificationIdOne);
+
+                //This ensures that navigating backward from the Activity leads out of the app to Home page
+                android.app.TaskStackBuilder stackBuilder = android.app.TaskStackBuilder.create(getApplicationContext());
+                // Adds the back stack for the Intent
+                stackBuilder.addParentStack(LoginActivity.class);
+
+                // Adds the Intent that starts the Activity to the top of the stack
+                stackBuilder.addNextIntent(resultIntent);
+                PendingIntent resultPendingIntent =
+                        stackBuilder.getPendingIntent(
+                                0,
+                                PendingIntent.FLAG_ONE_SHOT //can only be used once
+                        );
+                // start the activity when the user clicks the notification text
+                mBuilder.setContentIntent(resultPendingIntent);
+
+                myNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+                // pass the Notification object to the system
+                myNotificationManager.notify(notificationIdOne, mBuilder.build());
+            }
+        });
     }
 
     public int getChatCounter(String chat){
@@ -660,6 +747,39 @@ public class Network extends Application {
                 }
             }
         }).start();
+    }
+
+    public String TimeConverter(String time){
+        String timeConverted = "";
+
+        if(!(time.equals(""))){
+            long timeAgo = timeStringtoMilis(time);
+            long now = System.currentTimeMillis();
+
+            if(DateUtils.isToday(timeAgo)){
+                timeConverted = (String) DateUtils.getRelativeDateTimeString(getApplicationContext(), timeAgo, DateUtils.SECOND_IN_MILLIS, DateUtils.SECOND_IN_MILLIS, DateUtils.FORMAT_ABBREV_ALL);
+                timeConverted = timeConverted.substring(timeConverted.length() - 5, timeConverted.length());
+            }else{
+                timeConverted = (String) DateUtils.getRelativeDateTimeString(getApplicationContext(), timeAgo, DateUtils.SECOND_IN_MILLIS, DateUtils.SECOND_IN_MILLIS, DateUtils.FORMAT_ABBREV_ALL);
+            }
+        }
+
+        Log.d("Network","TimeConverted: " + timeConverted);
+        return timeConverted;
+    }
+
+    private long timeStringtoMilis(String time) {
+        long milis = 0;
+
+        try {
+            SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            Date date 	= sd.parse(time);
+            milis 		= date.getTime();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return milis;
     }
 
     public void showAlertDialog(String title, String message, Context context){

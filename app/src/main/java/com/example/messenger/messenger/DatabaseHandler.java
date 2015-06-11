@@ -274,7 +274,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put(KEY_SENTDATE, message.getSentDate());
         // updating row
         db.update(MESSAGE_ARCHIVE_TABLE, values, KEY_ID + " = ?",
-                new String[] { String.valueOf(message.getID()) });
+                new String[] { String.valueOf(message.getID())});
         db.close();
     }
 
@@ -287,7 +287,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put(KEY_STATUS, contact.getStatus());
         // updating row
         db.update(CONTACTS_TABLE, values, KEY_ID + " = ?",
-                new String[] { String.valueOf(contact.getID()) });
+                new String[] { String.valueOf(contact.getID())});
         db.close();
     }
 
@@ -318,7 +318,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public void deleteContact(Contact contact) {
         SQLiteDatabase db = this.getWritableDatabase();
         db.delete(CONTACTS_TABLE, KEY_ID + " = ?",
-                new String[] { String.valueOf(contact.getID()) });
+                new String[] { String.valueOf(contact.getID())});
         db.close();
     }
 
@@ -326,7 +326,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public void deleteChat(ChatList chat) {
         SQLiteDatabase db = this.getWritableDatabase();
         db.delete(CHATS_TABLE, KEY_ID + " = ?",
-                new String[]{String.valueOf(chat.getID()) });
+                new String[]{String.valueOf(chat.getID())});
         db.close();
     }
 
@@ -335,10 +335,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         String countQuery = "SELECT  * FROM " + MESSAGE_ARCHIVE_TABLE;
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(countQuery, null);
-        cursor.close();
         // return count
         int count;
         count = cursor.getCount();
+        cursor.close();
         db.close();
         return count;
     }
@@ -348,10 +348,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         String countQuery = "SELECT  * FROM " + CONTACTS_TABLE;
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(countQuery, null);
-        cursor.close();
         // return count
         int count;
         count = cursor.getCount();
+        cursor.close();
         db.close();
         return count;
     }
@@ -361,10 +361,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         String countQuery = "SELECT  * FROM " + CHATS_TABLE;
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(countQuery, null);
-        cursor.close();
         // return count
         int count;
         count = cursor.getCount();
+        cursor.close();
         db.close();
         return count;
     }
