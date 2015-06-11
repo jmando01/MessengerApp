@@ -332,7 +332,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     // Getting messages Count
     public int getMessagesCount() {
-        String countQuery = "SELECT  * FROM " + MESSAGE_ARCHIVE_TABLE;
+        String countQuery = "SELECT  * FROM " + MESSAGE_ARCHIVE_TABLE + " WHERE user = '"+ LoginActivity.sharedPref.getString("username", "default") +"'";
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(countQuery, null);
         // return count
@@ -345,7 +345,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     // Getting contacts Count
     public int getContactsCount() {
-        String countQuery = "SELECT  * FROM " + CONTACTS_TABLE;
+        String countQuery = "SELECT  * FROM " + CONTACTS_TABLE + " WHERE user = '"+ LoginActivity.sharedPref.getString("username", "default") +"'";
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(countQuery, null);
         // return count
@@ -358,7 +358,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     // Getting Chats Count
     public int getChatsCount() {
-        String countQuery = "SELECT  * FROM " + CHATS_TABLE;
+        String countQuery = "SELECT  * FROM " + CHATS_TABLE + " WHERE user = '"+ LoginActivity.sharedPref.getString("username", "default") +"'";
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(countQuery, null);
         // return count
