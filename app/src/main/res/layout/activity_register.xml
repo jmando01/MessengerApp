@@ -34,8 +34,7 @@
         android:layout_alignEnd="@+id/repassword"
         android:layout_above="@+id/repassword"
         android:hint="Password"
-        android:gravity="center_vertical|center_horizontal"
-        android:text="123456" />
+        android:gravity="center_vertical|center_horizontal" />
 
     <EditText
         android:layout_width="wrap_content"
@@ -49,8 +48,7 @@
         android:layout_alignRight="@+id/registerbtn"
         android:layout_alignEnd="@+id/registerbtn"
         android:hint="Confirm Password"
-        android:gravity="center_vertical|center_horizontal"
-        android:text="123456" />
+        android:gravity="center_vertical|center_horizontal" />
 
     <EditText
         android:layout_width="wrap_content"
@@ -64,8 +62,7 @@
         android:layout_alignRight="@+id/password"
         android:layout_alignEnd="@+id/password"
         android:gravity="center_vertical|center_horizontal"
-        android:hint="Email"
-        android:text="jmando01@hotmail.com" />
+        android:hint="Email" />
 
     <EditText
         android:layout_width="wrap_content"
@@ -79,7 +76,6 @@
         android:layout_alignRight="@+id/email"
         android:layout_alignEnd="@+id/email"
         android:hint="Username"
-        android:gravity="center_vertical|center_horizontal"
-        android:text="admin2" />
+        android:gravity="center_vertical|center_horizontal" />
 
 </RelativeLayout>

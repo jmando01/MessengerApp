@@ -62,8 +62,7 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         android:gravity="center_vertical|center_horizontal"
-        android:hint="Password"
-        android:text="1234" />
+        android:hint="Password" />
 
     <TextView
         android:layout_width="wrap_content"
