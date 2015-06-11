@@ -70,7 +70,7 @@ public class ChatCommentBaseAdapter extends ArrayAdapter<ChatComment> {
         Point size = new Point();
         display.getSize(size);
         int width = size.x;
-        chatComment.setMaxWidth(width - 200);
+        chatComment.setMaxWidth(width - 120);
         chatComment.setText(comment.getComment());
         chatComment.setBackgroundResource(comment.getSide() ? R.drawable.bubble_grey_left : R.drawable.bubble_red_right);
         sentDate.setText(comment.getDate());

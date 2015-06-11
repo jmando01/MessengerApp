@@ -13,10 +13,10 @@
         android:id="@+id/chatCommentLv"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:layout_above="@+id/sendBtn"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true" />
+        android:layout_alignParentTop="true"
+        android:layout_above="@+id/editText" />
 
     <EditText
         android:layout_width="wrap_content"
@@ -24,7 +24,6 @@
         android:id="@+id/editText"
         android:layout_toLeftOf="@+id/sendBtn"
         android:hint="Send a message"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_alignParentBottom="true" />
 
@@ -33,9 +32,10 @@
         android:layout_height="wrap_content"
         android:text="Send"
         android:id="@+id/sendBtn"
-        android:layout_alignBottom="@+id/editText"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:onClick="sendBtn"/>
+        android:onClick="sendBtn"
+        android:layout_alignTop="@+id/editText"
+        android:layout_alignParentBottom="true" />
 
 </RelativeLayout>

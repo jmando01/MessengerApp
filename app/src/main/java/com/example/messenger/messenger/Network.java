@@ -53,6 +53,9 @@ import java.util.TimerTask;
  *****Notificaciones.
  * Hacer la sincronizacion de contactos y chats.
  * Blocking List.
+ * Hacer que los iconos cambien de color dependiendo el estado.
+ * Terminar los settings.
+ * hacer los updates.
  */
 public class Network extends Application {
 
