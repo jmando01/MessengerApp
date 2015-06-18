@@ -50,8 +50,6 @@ public class ChatListActivity extends FragmentActivity {
         // remove the notification with the specific id
         myNotificationManager.cancel(111);
 
-        isRunning = true;
-
         TabAdapter = new TabPagerAdapter(getSupportFragmentManager());
 
         Tab = (ViewPager)findViewById(R.id.pager);
@@ -196,6 +194,14 @@ public class ChatListActivity extends FragmentActivity {
                     "Please wait for reconnection", Toast.LENGTH_LONG)
                     .show();
         }
+    }
+
+    @Override
+    protected void onResume(){
+        isRunning = true;
+        ChatListTab.reloadChatList();
+        Log.d("ChatListActivity", "onResume");
+        super.onResume();
     }
 
     @Override

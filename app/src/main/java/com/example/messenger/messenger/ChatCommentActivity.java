@@ -32,7 +32,6 @@ public class ChatCommentActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat_comment);
 
-        isRunning = true;
         Intent intent = getIntent();
         contact = intent.getStringExtra("contact");
         editText = (EditText) findViewById(R.id.editText);
@@ -87,10 +86,17 @@ public class ChatCommentActivity extends Activity {
     }
 
     @Override
+    protected void onResume(){
+        Log.d("ChatCommentActivity", "onResume");
+        isRunning = true;
+        super.onResume();
+    }
+
+    @Override
     protected void onPause() {
-        super.onPause();
-        Log.d("ChatActivity", "onPause");
+        Log.d("ChatCommentActivity", "onPause");
         isRunning = false;
+        super.onPause();
     }
 
     @Override
